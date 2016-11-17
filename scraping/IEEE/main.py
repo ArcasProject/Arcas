@@ -28,7 +28,7 @@ url = create_url_search(parameters=parameters, standard=standard)
 root = fetch_xml(url)
 
 parents = root.getchildren()
-[parents.remove(parents[0]) for _ in range(2)]
+for _ in range(2): parents.remove(parents[0])
 
 for document in parents:
     article = xml_to_dict(document)
