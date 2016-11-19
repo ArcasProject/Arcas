@@ -55,26 +55,6 @@ def xml_to_dict(branch):
     return article
 
 
-def iee_to_axelbib(article):
-    """A function which takes a dictionary with structure of the IEEE results
-    and transform it to a structure understandable by Axelbib"""
-    keys = ['abstract', 'author', 'date', 'title', 'journal', 'notes', 'key']
-
-    article['author'] = []
-    for i in article['authors'].split('; '):
-        article['author'].append({'name': i})
-    article['date'] = {'year': int(article['py'])}
-    article['journal'] = article.pop('pubtitle')
-    article['notes'] = article.pop('pdf')
-
-    first_name, last_name = article['author'][0]['name'].split(' ')
-    year = article['date']['year']
-    article['key'] = {'{}{}'.format(last_name, year)}
-
-    post = {key: article[key] for key in keys}
-    return post
-
-
 def post_to_axelbib(post):
     """A function for posting to Axelbib"""
     url = 'http://127.0.0.1:8000/article/'
