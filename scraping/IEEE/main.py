@@ -13,7 +13,7 @@ Options:
     -hc NUMBER              Number of records to fetch. [default: 25]
 """
 
-from scraping.tools import *
+from scraping.tools import Api
 from docopt import docopt
 
 

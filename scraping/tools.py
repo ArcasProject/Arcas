@@ -4,7 +4,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 from xml.etree import ElementTree
 from collections import defaultdict
-from scraping.password import password
+from .password import password
 
 import json
 import requests
