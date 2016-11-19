@@ -1,2 +1,7 @@
 .idea/
 password.py
+scraping/.ipynb_checkpoints/
+scraping/.tools.py.swp
+scraping/IEEE/__pycache__/
+scraping/__pycache__/
+
