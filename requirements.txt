@@ -1,3 +1,7 @@
 requests
+requests_mock
 pandas
 ratelimit
+docopt
+collections
+unnitest
