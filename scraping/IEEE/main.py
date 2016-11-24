@@ -22,9 +22,7 @@ class Ieee(Api):
         article['journal'] = article.pop('pubtitle')
 
         full_name = article['author'][0]['name'].split(' ')
-        print(full_name)
         year = article['date']['year']
-        print(full_name[-1])
         article['key'] = '{}{}'.format(full_name[-1], year)
         article['pages'], article['labels'], article['list_strategies'] = "", [], []
 
