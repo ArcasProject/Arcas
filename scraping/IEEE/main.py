@@ -1,25 +1,9 @@
-"""IEEE Xplore API Request.
-
-Usage:
-    IEEE/main.py -h [-au AUTHOR] [-ti TITLE] [-ab ABSTRACT] [-py YEAR] [-hc
-    NUMBER]
-
-Options:
-    -h --help               show this
-    -au AUTHOR              Terms to search for in Author [default: ""]
-    -ti TITLE               Terms to search for in Title [default: ""]
-    -ab ABSTRACT            Terms to search for in the Abstract [default: ""]
-    -py YEAR                Terms to search for in Year [default: ""]
-    -hc NUMBER              Number of records to fetch. [default: 25]
-"""
-
 from scraping.tools import Api
-from docopt import docopt
 
 
 class Ieee(Api):
     """
-
+     API argument is 'ieee'.
     """
     def __init__(self):
         self.standard = 'http://ieeexplore.ieee.org/gateway/ipsSearch.jsp?'
@@ -28,37 +12,49 @@ class Ieee(Api):
     def to_axelbib(article):
         """A function which takes a dictionary with structure of the IEEE results
         and transform it to a structure understandable by Axelbib"""
-        keys = ['abstract', 'author', 'date', 'title', 'journal', 'notes', 'key']
+        keys = ['key', 'title', 'abstract', 'author', 'date', 'journal',
+                'pages', 'labels', 'list_strategies']
 
         article['author'] = []
-        for i in article['authors'].split('; '):
+        for i in article['authors'].split(';  '):
             article['author'].append({'name': i})
         article['date'] = {'year': int(article['py'])}
         article['journal'] = article.pop('pubtitle')
-        article['notes'] = article.pop('pdf')
 
-        first_name, last_name = article['author'][0]['name'].split(' ')
+        full_name = article['author'][0]['name'].split(' ')
+        print(full_name)
         year = article['date']['year']
-        article['key'] = {'{}{}'.format(last_name, year)}
+        print(full_name[-1])
+        article['key'] = '{}{}'.format(full_name[-1], year)
+        article['pages'], article['labels'], article['list_strategies'] = "", [], []
 
         post = {key: article[key] for key in keys}
+
         return post
 
     @staticmethod
     def parse(root):
+        """Removing unwanted branches."""
         parents = root.getchildren()
         for _ in range(2):
             parents.remove(parents[0])
         return parents
 
-if __name__ == '__main__':
-    arguments = docopt(__doc__, version='IEEE Xplore API Request')
+    @staticmethod
+    def parameters_fix(arguments):
+        parameters = []
+        if arguments['-a'] is not None:
+            parameters.append('au={}'.format(arguments['-a']))
+        if arguments['-t'] is not None:
+            parameters.append('ti={}'.format(arguments['-t']))
+        if arguments['-b'] is not None:
+            parameters.append('ab={}'.format(arguments['-b']))
+        if arguments['-y'] is not None:
+            parameters.append('py={}'.format(arguments['-y']))
+        if arguments['-r'] is not None:
+            parameters.append('hc={}'.format(arguments['-r']))
 
-    parameters = ['au={}'.format(arguments['-au']), 'ti={}'.format(arguments['-ti']),
-                  'ab={}'.format(arguments['-ab']), 'py={}'.format(arguments['-py']),
-                  'hc={}'.format(arguments['-hc'])]
+        return parameters
 
-    api = Ieee()
-    api.run(parameters)
 
 
