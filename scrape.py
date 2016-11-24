@@ -21,8 +21,9 @@ from docopt import docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='API Request')
 
-    apis = {"ieee": Ieee}
+    apis = {"ieee": Ieee, "arxiv": Arxiv}
     api = apis[arguments['-p']]()
 
     parameters = api.parameters_fix(arguments)
+    print(parameters)
     api.run(parameters)
