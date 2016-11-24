@@ -4,4 +4,6 @@ scraping/.ipynb_checkpoints/
 scraping/.tools.py.swp
 scraping/IEEE/__pycache__/
 scraping/__pycache__/
+status_report
+scraping/arXiv/.ipynb_checkpoints/
 
