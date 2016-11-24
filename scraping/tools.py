@@ -28,12 +28,13 @@ class Api():
         """Creates the search url, combining the standard url and various
         search parameters."""
         url = self.standard
-        for i in parameters:
+        url += parameters[0]
+        for i in parameters[1:]:
             url += '&{}'.format(i)
         return url
 
     @staticmethod
-    @rate_limited(1)
+    @rate_limited(3)
     def make_request(url):
         """Request from an API and returns response."""
         response = requests.get(url, stream=True)
@@ -74,13 +75,18 @@ class Api():
     def parameters_fix(arguments):
         pass
 
+    @staticmethod
+    def get_root(response):
+        root = ElementTree.parse(response.raw).getroot()
+        return root
+
     def run(self, parameters, filename="status_report"):
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to axelbib format and posts it."""
 
         url = self.create_url_search(parameters=parameters)
         response = self.make_request(url)
-        root = ElementTree.parse(response.raw).getroot()
+        root = self.get_root(response)
         parents = self.parse(root)
 
         for document in parents:
