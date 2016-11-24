@@ -14,7 +14,7 @@ for querying the IEEE Xplore Search Gateway is as follow:
 | py      |Terms to search for in Publication Year|"Publication Year"|
 | hc      |Number of records to fetch. Default: 25; Maximum: 1000|   |
 
-For further search parameters available in IEEE Xplore see visit the
+For further search parameters available in IEEE Xplore visit the
 official site: http://ieeexplore.ieee.org/gateway/.
 
 Return Structure
