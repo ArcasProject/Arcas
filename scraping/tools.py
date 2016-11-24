@@ -43,10 +43,13 @@ class Api():
 
     @staticmethod
     def xml_to_dict(branch):
-        """Branch to dictionary."""
+        """Branch to dictionary"""
         article = defaultdict()
         for at in branch.iter():
-            article.update({at.tag: at.text})
+            if at.tag in article and at.text != None:
+                article[at.tag] += ',{}'.format(at.text)
+            else:
+                article.update({at.tag: at.text})
         return article
 
     @staticmethod
