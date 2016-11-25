@@ -2,7 +2,7 @@
 
 Usage:
     scrape.py [-h] [-p API] [-a AUTHOR] [-t TITLE] [-b ABSTRACT] [-y YEAR]
-              [-r RECORDS]
+              [-r RECORDS] [-s START]
 
 Options:
     -h --help              show this
@@ -12,6 +12,7 @@ Options:
     -b ABSTRACT            Terms to search for in the Abstract
     -y YEAR                Terms to search for in Year
     -r RECORDS             Number of records to fetch
+    -s START               Sequence number of first record to fetch
 """
 
 from scraping import *
@@ -25,5 +26,4 @@ if __name__ == '__main__':
     api = apis[arguments['-p']]()
 
     parameters = api.parameters_fix(arguments)
-    print(parameters)
     api.run(parameters)

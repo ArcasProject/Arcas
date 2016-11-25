@@ -87,12 +87,20 @@ class Api():
         url = self.create_url_search(parameters=parameters)
         response = self.make_request(url)
         root = self.get_root(response)
-        parents = self.parse(root)
 
-        for document in parents:
-            article = self.xml_to_dict(document)
-            post = self.to_axelbib(article)
-            send = self.post_to_axelbib(post)
+        try:
+            parents = self.parse(root)
+            for document in parents:
+                article = self.xml_to_dict(document)
+                post = self.to_axelbib(article)
+                send = self.post_to_axelbib(post)
 
-            with open(filename, 'a') as textfile:
-                textfile.write('{} -- {}\n'.format(post['key'], send))
+                with open(filename, 'a') as textfile:
+                    textfile.write('{} -- {}\n'.format(post['key'], send))
+        except:
+            raise ValueError('Empty Results. (url:{})'.format(url))
+
+
+
+
+
