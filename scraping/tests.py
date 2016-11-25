@@ -16,7 +16,7 @@ class TestTools(unittest.TestCase):
 
         parameters = ['ti=Title', 'au=Author']
         url = self.api.create_url_search(parameters=parameters)
-        self.assertEqual('http:/Search;&ti=Title&au=Author', url)
+        self.assertEqual('http:/Search;ti=Title&au=Author', url)
 
     @requests_mock.mock()
     def test_requests(self, m):
