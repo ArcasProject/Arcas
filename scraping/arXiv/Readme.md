@@ -15,6 +15,7 @@ Parameters
 | id 	  |Id (use id_list instead)|
 | all 	  |All of the above        |
 |max_results| |
+|start|
 
 For further details of the ArXiv Api and search arguments visit the official
 site: https://arxiv.org/help/api/index.

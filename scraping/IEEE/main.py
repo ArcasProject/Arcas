@@ -51,6 +51,8 @@ class Ieee(Api):
             parameters.append('py={}'.format(arguments['-y']))
         if arguments['-r'] is not None:
             parameters.append('hc={}'.format(arguments['-r']))
+        if arguments['-s'] is not None:
+            parameters.append('rs={}'.format(arguments['-s']))
 
         return parameters
 

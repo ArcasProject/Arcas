@@ -60,6 +60,8 @@ class Arxiv(Api):
             parameters.append('ab:{}'.format(arguments['-b']))
         if arguments['-r'] is not None:
             parameters.append('max_results={}'.format(arguments['-r']))
+        if arguments['-s'] is not None:
+            parameters.append('start={}'.format(arguments['-s']))
 
         return parameters
 

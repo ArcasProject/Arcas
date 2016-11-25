@@ -13,6 +13,7 @@ for querying the IEEE Xplore Search Gateway is as follow:
 | ab      |Terms to search for in Abstract|Abstract          |
 | py      |Terms to search for in Publication Year|"Publication Year"|
 | hc      |Number of records to fetch. Default: 25; Maximum: 1000|   |
+| rs      | Sequence number of first record to fetch| |
 
 For further search parameters available in IEEE Xplore visit the
 official site: http://ieeexplore.ieee.org/gateway/.
