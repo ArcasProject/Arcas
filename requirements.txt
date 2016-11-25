@@ -3,4 +3,3 @@ requests_mock
 pandas
 ratelimit
 docopt
-unnitest
