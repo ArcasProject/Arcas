@@ -3,7 +3,7 @@ import collections
 import requests
 import requests_mock
 from xml.etree.ElementTree import Element
-from scraping.tools import *
+from scraping.tools import Api
 
 
 class TestTools(unittest.TestCase):
