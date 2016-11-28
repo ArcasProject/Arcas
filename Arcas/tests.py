@@ -3,9 +3,9 @@ import collections
 import requests
 import requests_mock
 from xml.etree.ElementTree import Element
-from scraping.tools import Api
-from scraping.IEEE.main import Ieee
-from scraping.arXiv.main import Arxiv
+from Arcas.tools import Api
+from Arcas.IEEE.main import Ieee
+from Arcas.arXiv.main import Arxiv
 
 arxiv_entry = dict(
                    {'{http://arxiv.org/schemas/atom}affiliation': 'A',
