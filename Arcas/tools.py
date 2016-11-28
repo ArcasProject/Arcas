@@ -96,7 +96,3 @@ class Api():
         except:
             raise ValueError('Empty Results.(url:{})'.format(url))
 
-
-
-
-

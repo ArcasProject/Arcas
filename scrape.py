@@ -1,4 +1,4 @@
-"""API Request.
+"""Arcas. A library to facilitate scraping of APIs for scholarly resources.
 
 Usage:
     scrape.py [-h] [-p API] [-a AUTHOR] [-t TITLE] [-b ABSTRACT] [-y YEAR]
@@ -6,7 +6,7 @@ Usage:
 
 Options:
     -h --help              show this
-    -p API                 The online API , from a given list, to parse [default: "ieee"]
+    -p API                 The online API, from a given list, to parse [default: "arxiv"]
     -a AUTHOR              Terms to search for in Author
     -t TITLE               Terms to search for in Title
     -b ABSTRACT            Terms to search for in the Abstract
@@ -17,7 +17,6 @@ Options:
 
 from scraping import *
 from docopt import docopt
-
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='API Request')
