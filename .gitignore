@@ -1,8 +1,6 @@
 .idea
-scraping/.ipynb_checkpoints/
-scraping/.tools.py.swp
-scraping/IEEE/__pycache__/
-scraping/__pycache__/
+Arcas/__pycache__/
+Arcas/IEEE/__pycache__/
+Arcas/arXiv/__pycache__/
 status_report
-scraping/arXiv/.ipynb_checkpoints/
-
+result.json
