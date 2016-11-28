@@ -1,5 +1,4 @@
-.idea/
-password.py
+.idea
 scraping/.ipynb_checkpoints/
 scraping/.tools.py.swp
 scraping/IEEE/__pycache__/
