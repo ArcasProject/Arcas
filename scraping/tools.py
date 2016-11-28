@@ -1,6 +1,5 @@
 from xml.etree import ElementTree
 from collections import defaultdict
-from .password import password
 
 import json
 import requests
@@ -54,17 +53,7 @@ class Api():
         return article
 
     @staticmethod
-    def post_to_axelbib(post):
-        """Posting dict to Axelbib"""
-        url = 'http://127.0.0.1:8000/article/'
-        headers = {'Content-Type': 'application/json'}
-
-        r = requests.post(url, data=json.dumps(post),
-                          auth=('nikoleta', password), headers=headers)
-        return r.status_code
-
-    @staticmethod
-    def to_axelbib(article):
+    def to_json(article):
         pass
 
     @staticmethod
@@ -82,7 +71,9 @@ class Api():
 
     def run(self, parameters, filename="status_report"):
         """Putting everything together. Creates the url, makes the request,
-        transforms from xml to dict to axelbib format and posts it."""
+        transforms from xml to dict to a standardized format and output to
+        json file.
+        """
 
         url = self.create_url_search(parameters=parameters)
         response = self.make_request(url)
@@ -92,11 +83,16 @@ class Api():
             parents = self.parse(root)
             for document in parents:
                 article = self.xml_to_dict(document)
-                post = self.to_axelbib(article)
-                send = self.post_to_axelbib(post)
+                post = self.to_json(article)
+
+                with open('result.json', 'w') as jsonfile:
+                   json.dump(post, jsonfile)
 
                 with open(filename, 'a') as textfile:
-                    textfile.write('{} -- {}\n'.format(post['key'], send))
+                   textfile.write('{}--{}--{}--({})\n'.format(post['key'],
+                                                              post['title'],
+                                                              url,
+                                                            post['unique_key']))
         except:
             raise ValueError('Empty Results. (url:{})'.format(url))
 
