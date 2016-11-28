@@ -34,8 +34,9 @@ class Arxiv(Api):
         except:
             article['journal'] = "arXiv"
         article['key_word'] = []
-        for i in article['primary_category']:
-            article['key_word'].append({'key_work': i})
+        if article['primary_category'] is not None:
+            for i in article['primary_category']:
+                article['key_word'].append({'key_work': i})
         article['abstract'] = article.pop('summary')
         article['labels'], article['list_strategies'] = [], []
         article['pages'] = ""
