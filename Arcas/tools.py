@@ -94,7 +94,7 @@ class Api():
                                                               url,
                                                             post['unique_key']))
         except:
-            raise ValueError('Empty Results. (url:{})'.format(url))
+            raise ValueError('Empty Results.(url:{})'.format(url))
 
 
 
