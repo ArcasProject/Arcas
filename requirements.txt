@@ -1,5 +1,5 @@
-requests
-requests_mock
+requests==2.12.1
+requests_mock==1.1.0
 pandas
-ratelimit
+ratelimit==1.1.0
 docopt
