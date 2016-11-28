@@ -1,4 +1,5 @@
 from scraping.tools import Api
+import hashlib
 
 
 class Ieee(Api):
@@ -9,22 +10,36 @@ class Ieee(Api):
         self.standard = 'http://ieeexplore.ieee.org/gateway/ipsSearch.jsp?'
 
     @staticmethod
-    def to_axelbib(article):
-        """A function which takes a dictionary with structure of the IEEE results
-        and transform it to a structure understandable by Axelbib"""
-        keys = ['key', 'title', 'abstract', 'author', 'date', 'journal',
-                'pages', 'labels', 'list_strategies']
+    def to_json(article):
+        """A function which takes a dictionary with structure of the IEEE
+        results and transform it to a standardized format.
+        """
+        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
+                'journal', 'pages', 'labels', 'read', 'key_word', 'provelance',
+                'list_strategies']
 
         article['author'] = []
         for i in article['authors'].split(';  '):
             article['author'].append({'name': i})
+        article['key_word'] = []
+        for j in article['term'].split(','):
+            article['key_word'].append({'key_work': j})
+
         article['date'] = {'year': int(article['py'])}
         article['journal'] = article.pop('pubtitle')
+        article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
+        article['provelance'] = 'IEEE'
+        article['read'] = False
+        article['labels'], article['list_strategies'] = [], []
 
         full_name = article['author'][0]['name'].split(' ')
         year = article['date']['year']
         article['key'] = '{}{}'.format(full_name[-1], year)
-        article['pages'], article['labels'], article['list_strategies'] = "", [], []
+
+        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
+                                                            article['abstract'])
+        hash_object = hashlib.md5(string.encode('utf-8'))
+        article['unique_key'] = hash_object.hexdigest()
 
         post = {key: article[key] for key in keys}
 

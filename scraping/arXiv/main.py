@@ -1,5 +1,6 @@
 from scraping.tools import Api
 from xml.etree import ElementTree
+import hashlib
 
 
 class Arxiv(Api):
@@ -10,11 +11,13 @@ class Arxiv(Api):
         self.standard = 'http://export.arxiv.org/api/query?search_query='
 
     @staticmethod
-    def to_axelbib(article):
-        """A function which takes a dictionary with structure of the IEEE results
-        and transform it to a structure understandable by Axelbib"""
-        keys = ['key', 'title', 'abstract', 'author', 'date', 'journal',
-                'pages', 'labels', 'list_strategies']
+    def to_json(article):
+        """A function which takes a dictionary with structure of the arXiv
+        results and transform it to a standardized format.
+        """
+        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
+                'journal', 'pages', 'labels', 'read', 'key_word', 'provelance',
+                'list_strategies']
 
         old_keys = list(article.keys())
         for i in range(len(old_keys)):
@@ -29,13 +32,24 @@ class Arxiv(Api):
         try:
             article['journal'] = article.pop('journal_ref')
         except:
-            article['journal'] = ""
+            article['journal'] = "arXiv"
+        article['key_word'] = []
+        for i in article['primary_category']:
+            article['key_word'].append({'key_work': i})
+        article['abstract'] = article.pop('summary')
+        article['labels'], article['list_strategies'] = [], []
+        article['pages'] = ""
+        article['provelance'] = 'arXiv'
+        article['read'] = False
+
         year = article['date']['year']
         full_name = article['author'][0]['name'].split(' ')
         article['key'] = '{}{}'.format(full_name[-1], year)
-        article['pages'] = ""
-        article['abstract'] = article.pop('summary')
-        article['labels'], article['list_strategies'] = [], []
+
+        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
+                                   article['abstract'])
+        hash_object = hashlib.md5(string.encode('utf-8'))
+        article['unique_key'] = hash_object.hexdigest()
 
         post = {key: article[key] for key in keys}
 
