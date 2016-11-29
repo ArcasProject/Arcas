@@ -28,7 +28,7 @@ class Ieee(Api):
         article['date'] = {'year': int(article['py'])}
         article['journal'] = article.pop('pubtitle')
         article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
-        article['provelance'] = 'IEEE'
+        article['provenance'] = 'IEEE'
         article['read'] = False
         article['labels'], article['list_strategies'] = [], []
 
