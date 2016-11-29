@@ -20,9 +20,9 @@ class Arxiv(Api):
                 'list_strategies']
 
         old_keys = list(article.keys())
-        for i in range(len(old_keys)):
-            dis, keep = old_keys[i].split('}')
-            article[keep] = article.pop(old_keys[i])
+        for i in old_keys:
+            keep = i.split('}')
+            article[keep[-1]] = article.pop(i)
 
         article['author'] = []
         for i in article['name'].split(','):
