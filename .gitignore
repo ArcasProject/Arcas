@@ -1,1 +1,6 @@
-.idea/
+.idea
+Arcas/__pycache__/
+Arcas/IEEE/__pycache__/
+Arcas/arXiv/__pycache__/
+status_report
+result.json
