@@ -6,6 +6,8 @@ from xml.etree.ElementTree import Element
 from Arcas.tools import Api
 from Arcas.IEEE.main import Ieee
 from Arcas.arXiv.main import Arxiv
+from Arcas.nature.main import Nature
+from Arcas.Springer.main import Springer
 
 arxiv_entry = dict(
                    {'{http://arxiv.org/schemas/atom}affiliation': 'A',
@@ -44,6 +46,52 @@ ieee_entry = dict(
                    'partnum': '1234',
                    'mdurl': 'http://ieeexplore.ieee.org',
                    'pdf': 'http://ieeexplore.ieee.org/'})
+
+nature_entry = dict({
+                     '{http://prismstandard.org/namespaces/pam/2.0/}message'
+                     : 'None',
+                     '{http://prismstandard.org/namespaces/pam/2.0/}article'
+                     : 'None',
+                     '{http://www.w3.org/1999/xhtml}head': 'None',
+                     '{http://purl.org/dc/elements/1.1/}identifier'
+                     : 'doi:10.10',
+                     '{http://purl.org/dc/elements/1.1/}title': 'A',
+                     '{http://purl.org/dc/elements/1.1/}creator': 'B',
+                     '{http://purl.org/dc/elements/1.1/}creator': 'C',
+                     '{http://prismstandard.org/namespaces/basic/2.1'
+                     '/}publicationName': 'D',
+                     '{http://prismstandard.org/namespaces/basic/2.1/}eIssn'
+                     : '1234-5678',
+                     '{http://prismstandard.org/namespaces/basic/2.1/}doi'
+                     : '10.10',
+                     '{http://purl.org/dc/elements/1.1/}publisher': 'E',
+                     '{http://prismstandard.org/namespaces/basic/2.1'
+                     '/}publicationDate': '2016-01-01',
+                     '{http://purl.org/dc/elements/1.1/}subject': 'F',
+                     '{http://purl.org/dc/elements/1.1/}description': 'Abstract'
+})
+
+springer_entry = dict({
+                    'records': 'None',
+                    '{http://prismstandard.org/namespaces/pam/2.0/}message':
+                    'None',
+                    '{http://www.w3.org/1999/xhtml}head': '',
+                    '{http://prismstandard.org/namespaces/pam/2.0/}article':
+                    'None',
+                    '{http://purl.org/dc/elements/1.1/}identifier': 'doi:10.10',
+                    '{http://purl.org/dc/elements/1.1/}title': 'Title',
+                    '{http://purl.org/dc/elements/1.1/}creator': 'A',
+                    '{http://purl.org/dc/elements/1.1/}creator': 'B',
+                    '{http://prismstandard.org/namespaces/basic/2.0/}publicationName':
+                    'C',
+                    'printIsbn': '123-456',
+                    'electronicIsbn': '123-456',
+                    '{http://purl.org/dc/elements/1.1/}publisher': 'Springer',
+                    '{http://prismstandard.org/namespaces/basic/2.0/}publicationDate':
+                    '2017-01-01',
+                    '{http://www.w3.org/1999/xhtml}body': 'None',
+                    'h1': 'Abstract',
+                    'p': 'Abstract'})
 
 keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date', 'journal',
         'pages', 'labels', 'read', 'key_word', 'provelance', 'list_strategies']
@@ -96,4 +144,22 @@ class TestIEEE(unittest.TestCase):
 
     def test_to_json(self):
         post = self.api.to_json(ieee_entry)
+        self.assertEqual(sorted(post.keys()), sorted(keys))
+
+
+class TestNature(unittest.TestCase):
+    def setUp(self):
+        self.api = Nature()
+
+    def test_to_json(self):
+        post = self.api.to_json(nature_entry)
+        self.assertEqual(sorted(post.keys()), sorted(keys))
+
+
+class TestSpinger(unittest.TestCase):
+    def setUp(self):
+        self.api = Springer()
+
+    def test_to_json(self):
+        post = self.api.to_json(springer_entry)
         self.assertEqual(sorted(post.keys()), sorted(keys))
