@@ -2,5 +2,8 @@
 Arcas/__pycache__/
 Arcas/IEEE/__pycache__/
 Arcas/arXiv/__pycache__/
+Arcas/PLOS/__pycache__/
+Arcas/Springer/__pycache__/
+Arcas/nature/__pycache__/
 status_report
 result.json

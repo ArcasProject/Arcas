@@ -1,6 +1,5 @@
 import unittest
 import collections
-import requests
 import requests_mock
 from xml.etree.ElementTree import Element
 from Arcas.tools import Api
@@ -49,10 +48,10 @@ ieee_entry = dict(
 
 nature_entry = dict({
                      '{http://prismstandard.org/namespaces/pam/2.0/}message'
-                     : 'None',
+                     : None,
                      '{http://prismstandard.org/namespaces/pam/2.0/}article'
-                     : 'None',
-                     '{http://www.w3.org/1999/xhtml}head': 'None',
+                     : None,
+                     '{http://www.w3.org/1999/xhtml}head': None,
                      '{http://purl.org/dc/elements/1.1/}identifier'
                      : 'doi:10.10',
                      '{http://purl.org/dc/elements/1.1/}title': 'A',
@@ -72,12 +71,12 @@ nature_entry = dict({
 })
 
 springer_entry = dict({
-                    'records': 'None',
+                    'records': None,
                     '{http://prismstandard.org/namespaces/pam/2.0/}message':
-                    'None',
+                    None,
                     '{http://www.w3.org/1999/xhtml}head': '',
                     '{http://prismstandard.org/namespaces/pam/2.0/}article':
-                    'None',
+                    None,
                     '{http://purl.org/dc/elements/1.1/}identifier': 'doi:10.10',
                     '{http://purl.org/dc/elements/1.1/}title': 'Title',
                     '{http://purl.org/dc/elements/1.1/}creator': 'A',
@@ -89,7 +88,7 @@ springer_entry = dict({
                     '{http://purl.org/dc/elements/1.1/}publisher': 'Springer',
                     '{http://prismstandard.org/namespaces/basic/2.0/}publicationDate':
                     '2017-01-01',
-                    '{http://www.w3.org/1999/xhtml}body': 'None',
+                    '{http://www.w3.org/1999/xhtml}body': None,
                     'h1': 'Abstract',
                     'p': 'Abstract'})
 
@@ -135,7 +134,7 @@ class TestArxiv(unittest.TestCase):
 
     def test_to_json(self):
         post = self.api.to_json(arxiv_entry)
-        self.assertEqual(sorted(post.keys()), sorted(keys))
+        self.assertEqual(sorted(post.keys()), sorted(self.api.keys()))
 
 
 class TestIEEE(unittest.TestCase):
@@ -144,7 +143,7 @@ class TestIEEE(unittest.TestCase):
 
     def test_to_json(self):
         post = self.api.to_json(ieee_entry)
-        self.assertEqual(sorted(post.keys()), sorted(keys))
+        self.assertEqual(sorted(post.keys()), sorted(self.api.keys()))
 
 
 class TestNature(unittest.TestCase):
@@ -153,7 +152,7 @@ class TestNature(unittest.TestCase):
 
     def test_to_json(self):
         post = self.api.to_json(nature_entry)
-        self.assertEqual(sorted(post.keys()), sorted(keys))
+        self.assertEqual(sorted(post.keys()), sorted(self.api.keys()))
 
 
 class TestSpinger(unittest.TestCase):
@@ -162,4 +161,4 @@ class TestSpinger(unittest.TestCase):
 
     def test_to_json(self):
         post = self.api.to_json(springer_entry)
-        self.assertEqual(sorted(post.keys()), sorted(keys))
+        self.assertEqual(sorted(post.keys()), sorted(self.api.keys()))
