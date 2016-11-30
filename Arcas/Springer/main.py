@@ -1,5 +1,4 @@
 from Arcas.tools import Api
-import hashlib
 
 
 class Springer(Api):
@@ -20,15 +19,10 @@ class Springer(Api):
         url += '&api_key={}'.format(self.key_api)
         return url
 
-    @staticmethod
-    def to_json(article):
+    def to_json(self, article):
         """A function which takes a dictionary with structure of the Springer
         results and transform it to a standardized format.
         """
-        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word', 'provelance',
-                'list_strategies']
-
         old_keys = list(article.keys())
         for i in old_keys:
             keep = i.split('}')
@@ -37,27 +31,23 @@ class Springer(Api):
         article['author'] = []
         for i in article['creator'].split(','):
             article['author'].append({'name': i})
-
-        article['date'] = {
-            'year': int(article['publicationDate'].split('-')[0])}
+        try:
+            article['date'] = {
+                'year': int(article['publicationDate'].split('-')[0])}
+            article['abstract'] = article.pop('p')
+        except:
+            article['date'] = {'year': 0}
+            article['abstract'] = ""
         article['journal'] = article.pop('publicationName')
         article['key_word'] = []
-        article['abstract'] = article.pop('p')
         article['labels'], article['list_strategies'] = [], []
         article['pages'] = ""
-        article['provelance'] = 'Springer'
+        article['provenance'] = 'Springer'
         article['read'] = False
 
-        full_name = article['author'][0]['name'].split(' ')
-        year = article['date']['year']
-        article['key'] = '{}{}'.format(full_name[-1], year)
+        article['key'], article['unique_key'] = self.create_keys(article)
 
-        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
-                                                            article['abstract'])
-        hash_object = hashlib.md5(string.encode('utf-8'))
-        article['unique_key'] = hash_object.hexdigest()
-
-        post = {key: article[key] for key in keys}
+        post = {key: article[key] for key in self.keys()}
 
         return post
 
@@ -65,7 +55,18 @@ class Springer(Api):
     def parse(root):
         """Removing unwanted branches."""
         parents = root.getchildren()[3]
-        return parents
+        if not parents:
+            articles = False
+        else:
+            temp = {}
+            articles = []
+            for count, i in enumerate(parents.iter()):
+                if (count + 1) % 32 == 0:
+                    articles.append(temp)
+                    temp = {}
+                else:
+                    temp.update({i.tag: i.text})
+        return articles
 
     @staticmethod
     def parameters_fix(arguments):
@@ -81,7 +82,7 @@ class Springer(Api):
         if arguments['-r'] is not None:
             parameters.append('s={}'.format(arguments['-r']))
         if arguments['-s'] is not None:
-            parameters.append('p=1'.format(arguments['-s']))
+            parameters.append('p={}'.format(arguments['-s']))
 
         return parameters
 

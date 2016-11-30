@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import json
 import requests
+import hashlib
 from ratelimit import *
 
 
@@ -19,8 +20,7 @@ class APIError(Exception):
 class Api():
 
     def __init__(self, standard):
-        """Initialize standard url. Each API has a different standardised url
-        path before the extra arguments."""
+        """Initializations"""
         self.standard = standard
 
     def create_url_search(self, parameters):
@@ -53,6 +53,13 @@ class Api():
         return article
 
     @staticmethod
+    def keys():
+        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
+                'journal', 'pages', 'labels', 'read', 'key_word',
+                'provenance', 'list_strategies']
+        return keys
+
+    @staticmethod
     def to_json(article):
         pass
 
@@ -69,30 +76,48 @@ class Api():
         root = ElementTree.parse(response.raw).getroot()
         return root
 
+    @staticmethod
+    def create_keys(article):
+        """Returns public key 'AuthorYear' and
+        unique key hash('Author''Title''Year''Abstract')
+        """
+        full_name = article['author'][0]['name'].split(' ')
+        year = article['date']['year']
+        string = '{}{}{}{}'.format(full_name[-1],
+                                   article['title'], year, article['abstract'])
+        hash_object = hashlib.md5(string.encode('utf-8'))
+
+        key = '{}{}'.format(full_name[-1], year)
+        unique_key = hash_object.hexdigest()
+
+        return key, unique_key
+
     def run(self, parameters, filename="status_report"):
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to a standardized format and output to
         json file.
         """
-
         url = self.create_url_search(parameters=parameters)
+        print(url)
         response = self.make_request(url)
         root = self.get_root(response)
+        articles = self.parse(root)
 
-        try:
-            parents = self.parse(root)
-            for document in parents:
-                article = self.xml_to_dict(document)
-                post = self.to_json(article)
+        if not articles:
+            raise ValueError('Empty results at {}'.format(url))
+        else:
+            for record in articles:
+                post = self.to_json(record)
 
                 with open('result.json', 'w') as jsonfile:
-                   json.dump(post, jsonfile)
+                    json.dump(post, jsonfile)
 
                 with open(filename, 'a') as textfile:
-                   textfile.write('{}--{}--{}--({})\n'.format(post['key'],
-                                                              post['title'],
-                                                              url,
-                                                            post['unique_key']))
-        except:
-            raise ValueError('Empty Results.(url:{})'.format(url))
+                    textfile.write('{}--{}--{}--({})\n'.format(post['key'],
+                                                               post['title'], url,
+                                                               post['unique_key']))
+
+
+
+
 

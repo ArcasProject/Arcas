@@ -15,13 +15,14 @@ Options:
     -s START               Sequence number of first record to fetch
 """
 
-from scraping import *
+from Arcas import *
 from docopt import docopt
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='API Request')
 
-    apis = {"ieee": Ieee, "arxiv": Arxiv}
+    apis = {"ieee": Ieee, "arxiv": Arxiv, "nature": Nature, "springer":
+            Springer, "plos": Plos}
     api = apis[arguments['-p']]()
 
     parameters = api.parameters_fix(arguments)

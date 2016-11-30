@@ -1,5 +1,4 @@
 from Arcas.tools import Api
-import hashlib
 
 
 class Ieee(Api):
@@ -9,21 +8,16 @@ class Ieee(Api):
     def __init__(self):
         self.standard = 'http://ieeexplore.ieee.org/gateway/ipsSearch.jsp?'
 
-    @staticmethod
-    def to_json(article):
+    def to_json(self, article):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
         """
-        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word', 'provelance',
-                'list_strategies']
-
         article['author'] = []
         for i in article['authors'].split(';  '):
             article['author'].append({'name': i})
         article['key_word'] = []
         for j in article['term'].split(','):
-            article['key_word'].append({'key_work': j})
+            article['key_word'].append({'key_word': j})
 
         article['date'] = {'year': int(article['py'])}
         article['journal'] = article.pop('pubtitle')
@@ -32,26 +26,24 @@ class Ieee(Api):
         article['read'] = False
         article['labels'], article['list_strategies'] = [], []
 
-        full_name = article['author'][0]['name'].split(' ')
-        year = article['date']['year']
-        article['key'] = '{}{}'.format(full_name[-1], year)
+        article['key'], article['unique_key'] = self.create_keys(article)
 
-        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
-                                                            article['abstract'])
-        hash_object = hashlib.md5(string.encode('utf-8'))
-        article['unique_key'] = hash_object.hexdigest()
-
-        post = {key: article[key] for key in keys}
+        post = {key: article[key] for key in self.keys()}
 
         return post
 
-    @staticmethod
-    def parse(root):
+    def parse(self, root):
         """Removing unwanted branches."""
         parents = root.getchildren()
+        articles = []
         for _ in range(2):
             parents.remove(parents[0])
-        return parents
+        if not parents:
+            articles = False
+        else:
+            for record in parents:
+                articles.append(self.xml_to_dict(record))
+        return articles
 
     @staticmethod
     def parameters_fix(arguments):
