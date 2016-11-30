@@ -1,38 +1,46 @@
 from Arcas.tools import Api
-import hashlib
 
 
 class Nature(Api):
-    """q
-     API argument is 'nature'.
+    """
+    API argument is 'nature'.
     """
     def __init__(self):
-        self.standard= 'http://www.nature.com/opensearch/request?'
+        self.standard = 'http://www.nature.com/opensearch/request?queryType=cql&query='
 
     def create_url_search(self, parameters):
         """Creates the search url, combining the standard url and various
         search parameters."""
         url = self.standard
         url += parameters[0]
-        for i in parameters[1:]:
+        for i in parameters[1:-2]:
             url += '+AND+{}'.format(i)
+        for j in parameters[-2:]:
+            url += '&{}'.format(j)
         return url
 
     @staticmethod
     def parse(root):
         """Removing unwanted branches."""
         parents = root.getchildren()[2]
-        return parents
 
-    @staticmethod
-    def to_json(article):
+        if not parents:
+            articles = False
+        else:
+            temp = {}
+            articles = []
+            for count, i in enumerate(parents.iter()):
+                if (count + 1) % 26 == 0:
+                    articles.append(temp)
+                    temp = {}
+                else:
+                    temp.update({i.tag: i.text})
+        return articles
+
+    def to_json(self, article):
         """A function which takes a dictionary with structure of the nature
-                results and transform it to a standardized format.
-                """
-        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word', 'provelance',
-                'list_strategies']
-
+        results and transform it to a standardized format.
+        """
         old_keys = list(article.keys())
         for i in old_keys:
             keep = i.split('}')
@@ -42,28 +50,19 @@ class Nature(Api):
         for i in article['creator'].split(',  '):
             article['author'].append({'name': i})
         article['key_word'] = []
-        for j in article['subject'].split(','):
-            article['key_word'].append({'key_work': j})
 
         article['abstract'] = article['description']
         article['date'] = {
             'year': int(article['publicationDate'].split('-')[0])}
         article['journal'] = article.pop('publicationName')
         article['pages'] = ""
-        article['provelance'] = 'Nature'
+        article['provenance'] = 'Nature'
         article['read'] = False
         article['labels'], article['list_strategies'] = [], []
 
-        full_name = article['author'][0]['name'].split(' ')
-        year = article['date']['year']
-        article['key'] = '{}{}'.format(full_name[-1], year)
+        article['key'], article['unique_key'] = self.create_keys(article)
 
-        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
-                                   article['abstract'])
-        hash_object = hashlib.md5(string.encode('utf-8'))
-        article['unique_key'] = hash_object.hexdigest()
-
-        post = {key: article[key] for key in keys}
+        post = {key: article[key] for key in self.keys()}
 
         return post
 
@@ -79,7 +78,7 @@ class Nature(Api):
         if arguments['-y'] is not None:
             parameters.append('prism.publicationDate={}'.format(arguments['-y']))
         if arguments['-r'] is not None:
-            parameters.append('maximumRecords=1')
+            parameters.append('maximumRecords={}'.format(arguments['-r']))
         if arguments['-s'] is not None:
             parameters.append('startRecord={}'.format(arguments['-s']))
 
