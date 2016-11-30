@@ -109,7 +109,7 @@ class Api():
             for record in articles:
                 post = self.to_json(record)
 
-                with open('result.json', 'w') as jsonfile:
+                with open('result.json', 'a') as jsonfile:
                     json.dump(post, jsonfile)
 
                 with open(filename, 'a') as textfile:
