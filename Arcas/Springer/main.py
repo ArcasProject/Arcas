@@ -61,7 +61,7 @@ class Springer(Api):
             temp = {}
             articles = []
             for count, i in enumerate(parents.iter()):
-                if (count + 1) % 32 == 0:
+                if i.tag == 'p':
                     articles.append(temp)
                     temp = {}
                 else:

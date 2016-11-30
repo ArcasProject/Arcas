@@ -30,7 +30,7 @@ class Nature(Api):
             temp = {}
             articles = []
             for count, i in enumerate(parents.iter()):
-                if (count + 1) % 26 == 0:
+                if i.tag.split('}')[-1] == 'recordPosition':
                     articles.append(temp)
                     temp = {}
                 else:
