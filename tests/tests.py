@@ -2,11 +2,11 @@ import unittest
 import collections
 import requests_mock
 from xml.etree.ElementTree import Element
-from Arcas.tools import Api
-from Arcas.IEEE.main import Ieee
-from Arcas.arXiv.main import Arxiv
-from Arcas.nature.main import Nature
-from Arcas.Springer.main import Springer
+from arcas.tools import Api
+from arcas.IEEE.main import Ieee
+from arcas.arXiv.main import Arxiv
+from arcas.nature.main import Nature
+from arcas.Springer.main import Springer
 
 arxiv_entry = dict(
                    {'{http://arxiv.org/schemas/atom}affiliation': 'A',
