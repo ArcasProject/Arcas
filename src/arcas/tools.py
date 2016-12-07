@@ -77,6 +77,13 @@ class Api():
         return root
 
     @staticmethod
+    def lower_case(post):
+        post = dict((k.lower() if isinstance(k, str) else k,
+                     v.lower() if isinstance(v, str) else v) for k, v in
+                    post.items())
+        return post
+
+    @staticmethod
     def create_keys(article):
         """Returns public key 'AuthorYear' and
         unique key hash('Author''Title''Year''Abstract')
@@ -92,32 +99,61 @@ class Api():
 
         return key, unique_key
 
-    def run(self, parameters, filename="status_report"):
+    def validate_post(self, arguments, post):
+        """
+        Checks if the query arguments abstract and title  were satisfied.
+
+        Parameters:
+            - arguments
+            - post
+        Returns:
+            - True of False
+        """
+        post = self.lower_case(post)
+        if arguments['-b'] is not None:
+            word = [arguments['-b']]
+            check = [post['abstract']]
+        elif arguments['-t'] is not None:
+            word = arguments['-t']
+            check = post['title']
+        elif arguments['-t'] and arguments['-b'] is not None:
+            word = arguments['-b'], arguments['-t']
+            print(word)
+            check = post['abstract'], post['title']
+            print(check)
+
+        return all([w in check[i] for i, w in enumerate(word)])
+
+    def run(self, parameters, arguments, validate):
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to a standardized format and output to
         json file.
         """
-        url = self.create_url_search(parameters=parameters)
-        print(url)
+        url = self.create_url_search(parameters)
         response = self.make_request(url)
         root = self.get_root(response)
         articles = self.parse(root)
-
         if not articles:
             raise ValueError('Empty results at {}'.format(url))
         else:
             for record in articles:
                 post = self.to_json(record)
 
-                with open('result.json', 'a') as jsonfile:
-                    json.dump(post, jsonfile)
+                if validate is True:
+                    try:
+                        self.validate_post(arguments, post)
+                    except:
+                        string = "Query was not satisfied for article with " \
+                                 "citation  key{} and unique key:{}".format(
+                                  post['key'], post['unique_key'])
+                        raise NotImplementedError(string)
+                return post
 
-                with open(filename, 'a') as textfile:
-                    textfile.write('{}--{}--{}--({})\n'.format(post['key'],
-                                                               post['title'], url,
-                                                               post['unique_key']))
-
-
-
+    @staticmethod
+    def export(post, filename):
+        """ Write the results to a json file
+        """
+        with open('{}.json'.format(filename), 'a') as jsonfile:
+            json.dump(post, jsonfile)
 
 

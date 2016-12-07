@@ -12,3 +12,4 @@ result.json
 build/
 dist/
 docs/
+.hypothesis/

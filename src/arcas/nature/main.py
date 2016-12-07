@@ -13,10 +13,11 @@ class Nature(Api):
         search parameters."""
         url = self.standard
         url += parameters[0]
-        for i in parameters[1:-2]:
-            url += '+AND+{}'.format(i)
-        for j in parameters[-2:]:
-            url += '&{}'.format(j)
+        for i in parameters[1:]:
+            if 'maximumRecords=' or 'startRecord=' not in i:
+                url += '+AND+{}'.format(i)
+            else:
+                url += '&{}'.format(i)
         return url
 
     @staticmethod

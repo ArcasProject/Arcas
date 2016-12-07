@@ -23,9 +23,9 @@ class Arxiv(Api):
             article['author'].append({'name': i})
 
         article['date'] = {'year': int(article['published'].split('-')[0])}
-        try:
+        if article['journal'] is not None:
             article['journal'] = article.pop('journal_ref')
-        except:
+        else:
             article['journal'] = "arXiv"
         article['key_word'] = []
         if article['primary_category'] is not None:
@@ -64,7 +64,7 @@ class Arxiv(Api):
         if arguments['-t'] is not None:
             parameters.append('ti:{}'.format(arguments['-t']))
         if arguments['-b'] is not None:
-            parameters.append('ab:{}'.format(arguments['-b']))
+            parameters.append('abs:{}'.format(arguments['-b']))
         if arguments['-r'] is not None:
             parameters.append('max_results={}'.format(arguments['-r']))
         if arguments['-s'] is not None:
