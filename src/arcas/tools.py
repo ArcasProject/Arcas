@@ -46,7 +46,7 @@ class Api():
         """Branch to dictionary"""
         article = defaultdict()
         for at in branch.iter():
-            if at.tag in article and at.text != None:
+            if at.tag in article and at.text is not None:
                 article[at.tag] += ',{}'.format(at.text)
             else:
                 article.update({at.tag: at.text})
@@ -55,8 +55,8 @@ class Api():
     @staticmethod
     def keys():
         keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word',
-                'provenance', 'list_strategies']
+                'journal', 'pages', 'labels', 'read', 'key_word', 'provenance',
+                'list_strategies']
         return keys
 
     @staticmethod
@@ -77,14 +77,22 @@ class Api():
         return root
 
     @staticmethod
+    def lower_case(post):
+        post = dict((k.lower() if isinstance(k, str) else k,
+                     v.lower() if isinstance(v, str) else v) for k, v in
+                    post.items())
+        return post
+
+    @staticmethod
     def create_keys(article):
         """Returns public key 'AuthorYear' and
         unique key hash('Author''Title''Year''Abstract')
         """
         full_name = article['author'][0]['name'].split(' ')
         year = article['date']['year']
-        string = '{}{}{}{}'.format(full_name[-1],
-                                   article['title'], year, article['abstract'])
+        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
+                                   article['abstract'])
+
         hash_object = hashlib.md5(string.encode('utf-8'))
 
         key = '{}{}'.format(full_name[-1], year)
@@ -92,32 +100,59 @@ class Api():
 
         return key, unique_key
 
-    def run(self, parameters, filename="status_report"):
+    def validate_post(self, arguments, post):
+        """
+                Checks if the query arguments abstract and title  were satisfied.
+
+                Parameters:
+                    - arguments
+                    - post
+                Returns:
+                    - True of False
+                """
+        post = self.lower_case(post)
+        arguments = self.lower_case(arguments)
+        word = [arguments['-b'], arguments['-t']]
+        check = [post['abstract'], post['title']]
+
+        val = []
+        for _, w in enumerate(word):
+            if w is not None:
+                for i in w.split(' '):
+                    val.append(i in check[_])
+
+        return all(val)
+
+
+    def run(self, url, arguments, validate):
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to a standardized format and output to
         json file.
         """
-        url = self.create_url_search(parameters=parameters)
-        print(url)
         response = self.make_request(url)
         root = self.get_root(response)
         articles = self.parse(root)
-
         if not articles:
             raise ValueError('Empty results at {}'.format(url))
         else:
             for record in articles:
                 post = self.to_json(record)
 
-                with open('result.json', 'a') as jsonfile:
-                    json.dump(post, jsonfile)
+                if validate is True:
+                    try:
+                        self.validate_post(arguments, post)
+                    except:
+                        string = "Query was not satisfied for article with " \
+                                 "citation  key{} and unique key:{}".format(
+                                  post['key'], post['unique_key'])
+                        raise NotImplementedError(string)
+                return post
 
-                with open(filename, 'a') as textfile:
-                    textfile.write('{}--{}--{}--({})\n'.format(post['key'],
-                                                               post['title'], url,
-                                                               post['unique_key']))
-
-
-
+    @staticmethod
+    def export(post, filename):
+        """ Write the results to a json file
+        """
+        with open('{}.json'.format(filename), 'a') as jsonfile:
+            json.dump(post, jsonfile)
 
 

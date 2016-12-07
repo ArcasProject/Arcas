@@ -12,19 +12,21 @@ class Ieee(Api):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
         """
-        article['author'] = []
+        article['author'], article['key_word'], article['labels'], article[
+            'list_strategies'] = [], [], [], []
+
         for i in article['authors'].split(';  '):
             article['author'].append({'name': i})
-        article['key_word'] = []
+
         for j in article['term'].split(','):
             article['key_word'].append({'key_word': j})
 
         article['date'] = {'year': int(article['py'])}
         article['journal'] = article.pop('pubtitle')
         article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
+
         article['provenance'] = 'IEEE'
         article['read'] = False
-        article['labels'], article['list_strategies'] = [], []
 
         article['key'], article['unique_key'] = self.create_keys(article)
 
@@ -34,15 +36,17 @@ class Ieee(Api):
 
     def parse(self, root):
         """Removing unwanted branches."""
-        parents = root.getchildren()
-        articles = []
-        for _ in range(2):
-            parents.remove(parents[0])
-        if not parents:
-            articles = False
-        else:
+        try:
+            parents = root.getchildren()
+            articles = []
+            for _ in range(2):
+                parents.remove(parents[0])
+
             for record in parents:
                 articles.append(self.xml_to_dict(record))
+        except:
+            articles = False
+
         return articles
 
     @staticmethod
@@ -62,6 +66,3 @@ class Ieee(Api):
             parameters.append('rs={}'.format(arguments['-s']))
 
         return parameters
-
-
-

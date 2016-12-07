@@ -1,3 +1,0 @@
-Scraping Nature.com OpenSearch
-===============================
-

@@ -13,17 +13,17 @@ class Nature(Api):
         search parameters."""
         url = self.standard
         url += parameters[0]
-        for i in parameters[1:-2]:
-            url += '+AND+{}'.format(i)
-        for j in parameters[-2:]:
-            url += '&{}'.format(j)
+        for i in parameters[1:]:
+            if 'maximumRecords=' in i or 'startRecord=' in i:
+                url += '&{}'.format(i)
+            else:
+                url += '+AND+{}'.format(i)
         return url
 
     @staticmethod
     def parse(root):
         """Removing unwanted branches."""
         parents = root.getchildren()[2]
-
         if not parents:
             articles = False
         else:
@@ -46,19 +46,18 @@ class Nature(Api):
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
 
-        article['author'] = []
+        article['author'], article['key_word'], article['labels'], article[
+            'list_strategies'] = [], [], [], []
+
         for i in article['creator'].split(',  '):
             article['author'].append({'name': i})
-        article['key_word'] = []
-
         article['abstract'] = article['description']
         article['date'] = {
             'year': int(article['publicationDate'].split('-')[0])}
-        article['journal'] = article.pop('publicationName')
+        article['journal'] = article.pop('publisher')
         article['pages'] = ""
         article['provenance'] = 'Nature'
         article['read'] = False
-        article['labels'], article['list_strategies'] = [], []
 
         article['key'], article['unique_key'] = self.create_keys(article)
 

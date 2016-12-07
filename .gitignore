@@ -12,3 +12,9 @@ result.json
 build/
 dist/
 docs/
+.hypothesis/
+results.json
+Notes.ipynb
+.ipynb_checkpoints/
+
+
