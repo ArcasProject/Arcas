@@ -59,11 +59,9 @@ class TestSpinger(unittest.TestCase):
         self.assertEqual('name:{}'.format(arguments['-a']), parameters[0])
         self.assertEqual('title:{}'.format(arguments['-t']),
                          parameters[1])
-        self.assertEqual('keyword:{}'.format(arguments['-b']),
-                         parameters[2])
         self.assertEqual('year:{}'.format(arguments['-y']),
-                         parameters[3])
+                         parameters[2])
         self.assertEqual('s={}'.format(arguments['-r']),
-                         parameters[4])
+                         parameters[3])
         self.assertEqual(('p={}'.format(arguments['-s'])),
-                         parameters[5])
+                         parameters[4])

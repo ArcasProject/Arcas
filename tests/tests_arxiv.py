@@ -58,7 +58,7 @@ class TestArxiv(unittest.TestCase):
         parameters = self.api.parameters_fix(arguments)
         self.assertEqual('au:{}'.format(arguments['-a']), parameters[0])
         self.assertEqual('ti:{}'.format(arguments['-t']), parameters[1])
-        self.assertEqual('ab:{}'.format(arguments['-b']), parameters[2])
+        self.assertEqual('abs:{}'.format(arguments['-b']), parameters[2])
         self.assertEqual('max_results={}'.format(arguments['-r']),
                          parameters[3])
         self.assertEqual(('start={}'.format(arguments['-s'])), parameters[4])

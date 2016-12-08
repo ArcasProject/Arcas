@@ -3,3 +3,4 @@ requests_mock==1.1.0
 ratelimit==1.1.0
 docopt
 hypothesis
+pytz

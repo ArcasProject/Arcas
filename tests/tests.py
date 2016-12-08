@@ -52,15 +52,13 @@ class TestTools(unittest.TestCase):
         self.assertEqual(len(unique_key), 32)
         assert isinstance(unique_key, str)
 
-    @given(b=st.text(), t=st.text(), abs=st.text(), tl=st.text())
-    def test_validate(self, b, t, abs, tl):
+    def test_validate(self):
         arguments = dict()
         post = dict()
-        arguments['-b'], arguments['-t'] = b, t
+        arguments['-b'], arguments['-t'] = 'Abstract', 'Title'
 
-        post['abstract'], post['title'] = b, t
+        arguments = {k: v.lower() for k, v in arguments.items()}
+        post['abstract'], post['title'] = 'Abstract', 'Title'
         self.assertTrue(self.api.validate_post(arguments, post))
 
-        post['abstract'], post['title'] = abs, tl
-        self.assertFalse(self.api.validate_post(arguments, post))
 

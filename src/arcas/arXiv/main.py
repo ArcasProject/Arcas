@@ -23,7 +23,7 @@ class Arxiv(Api):
             article['author'].append({'name': i})
 
         article['date'] = {'year': int(article['published'].split('-')[0])}
-        if article['journal'] is not None:
+        if article['journal_ref'] is not None:
             article['journal'] = article.pop('journal_ref')
         else:
             article['journal'] = "arXiv"

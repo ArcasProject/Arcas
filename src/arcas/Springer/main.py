@@ -1,5 +1,5 @@
 from arcas.tools import Api
-from api_key import api_key
+from .api_key import api_key
 from xml.etree import ElementTree
 
 
