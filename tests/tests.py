@@ -57,7 +57,6 @@ class TestTools(unittest.TestCase):
         post = dict()
         arguments['-b'], arguments['-t'] = 'Abstract', 'Title'
 
-        arguments = {k: v.lower() for k, v in arguments.items()}
         post['abstract'], post['title'] = 'Abstract', 'Title'
         self.assertTrue(self.api.validate_post(arguments, post))
 
