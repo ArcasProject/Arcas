@@ -112,15 +112,15 @@ class Api():
         post = self.lower_case(post)
 
         if arguments['-b'] is not None:
-            word = [arguments['-b']]
-            check = [post['abstract'].lower()]
+            word = [arguments['-b'].lower()]
+            check = [post['abstract']]
         elif arguments['-t'] is not None:
-            word = [arguments['-t']]
-            check = [post['title'].lower()]
+            word = [arguments['-t'].lower()]
+            check = [post['title']]
         elif arguments['-t'] and arguments['-b'] is not None:
-            word = [arguments['-b'], arguments['-t']]
+            word = arguments['-b'], arguments['-t']
+            word = [v.lower() for v in word]
             check = post['abstract'], post['title']
-            check = [v.lower() for v in check]
 
         return all([w in check[i] for i, w in enumerate(word)])
 
