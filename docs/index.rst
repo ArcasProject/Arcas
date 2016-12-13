@@ -1,15 +1,20 @@
-.. Arcas documentation master file, created by
-   sphinx-quickstart on Thu Dec  1 18:02:13 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to Arcas's documentation!
 =================================
+Arcas is python tool designed to help scraping APIs for academic articles.
+Currently only the following APIs have been implement:
+    - IEEE
+    - springer
+    - arXiv
+    - nature
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   installation.rst
+   Apis/index.rst
+   Example/index.rst
 
 
 

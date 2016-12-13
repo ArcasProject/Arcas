@@ -46,7 +46,7 @@ class Api():
         """Branch to dictionary"""
         article = defaultdict()
         for at in branch.iter():
-            if at.tag in article and at.text != None:
+            if at.tag in article and at.text is not None:
                 article[at.tag] += ',{}'.format(at.text)
             else:
                 article.update({at.tag: at.text})
@@ -55,8 +55,8 @@ class Api():
     @staticmethod
     def keys():
         keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word',
-                'provenance', 'list_strategies']
+                'journal', 'pages', 'labels', 'read', 'key_word', 'provenance',
+                'list_strategies']
         return keys
 
     @staticmethod
@@ -90,8 +90,9 @@ class Api():
         """
         full_name = article['author'][0]['name'].split(' ')
         year = article['date']['year']
-        string = '{}{}{}{}'.format(full_name[-1],
-                                   article['title'], year, article['abstract'])
+        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
+                                   article['abstract'])
+
         hash_object = hashlib.md5(string.encode('utf-8'))
 
         key = '{}{}'.format(full_name[-1], year)
@@ -110,26 +111,18 @@ class Api():
             - True of False
         """
         post = self.lower_case(post)
+        arguments = {k: v.lower() for k, v in arguments.items()}
+        word = arguments['-b'], arguments['-t']
+        check = post['abstract'], post['title']
 
-        if arguments['-b'] is not None:
-            word = [arguments['-b'].lower()]
-            check = [post['abstract']]
-        elif arguments['-t'] is not None:
-            word = [arguments['-t'].lower()]
-            check = [post['title']]
-        elif arguments['-t'] and arguments['-b'] is not None:
-            word = arguments['-b'], arguments['-t']
-            word = [v.lower() for v in word]
-            check = post['abstract'], post['title']
+        return all([w in check for w in word if w is not None])
 
-        return all([w in check[i] for i, w in enumerate(word)])
 
-    def run(self, parameters, arguments, validate):
+    def run(self, url, arguments, validate):
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to a standardized format and output to
         json file.
         """
-        url = self.create_url_search(parameters)
         response = self.make_request(url)
         root = self.get_root(response)
         articles = self.parse(root)
