@@ -111,31 +111,14 @@ class Api():
             - True of False
         """
         post = self.lower_case(post)
-<<<<<<< HEAD
         arguments = {k: v.lower() for k, v in arguments.items()}
         word = arguments['-b'], arguments['-t']
         check = post['abstract'], post['title']
 
         return all([w in check for w in word if w is not None])
 
+
     def run(self, url, arguments, validate):
-=======
-
-        if arguments['-b'] is not None:
-            word = [arguments['-b'].lower()]
-            check = [post['abstract']]
-        elif arguments['-t'] is not None:
-            word = [arguments['-t'].lower()]
-            check = [post['title']]
-        elif arguments['-t'] and arguments['-b'] is not None:
-            word = arguments['-b'], arguments['-t']
-            word = [v.lower() for v in word]
-            check = post['abstract'], post['title']
-
-        return all([w in check[i] for i, w in enumerate(word)])
-
-    def run(self, parameters, arguments, validate):
->>>>>>> 4a9bdb9ea8e54c1a22b1e339ed556391a6cac38e
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to a standardized format and output to
         json file.
