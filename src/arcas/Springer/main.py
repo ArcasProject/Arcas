@@ -17,10 +17,10 @@ class Springer(Api):
         url = self.standard
         url += parameters[0]
         for i in parameters[1:]:
-            if 's=' or 'p=' not in i:
-                url += '+AND+{}'.format(i)
-            else:
+            if 's=' in i or 'p=' in i:
                 url += '&{}'.format(i)
+            else:
+                url += '+AND+{}'.format(i)
         url += '&api_key={}'.format(self.key_api)
         return url
 
