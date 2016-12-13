@@ -1,5 +1,6 @@
 from arcas.tools import Api
 from xml.etree import ElementTree
+from collections import OrderedDict
 
 
 class Plos(Api):
@@ -15,51 +16,69 @@ class Plos(Api):
         url = self.standard
         url += parameters[0]
         for i in parameters[1:]:
-            if 'rows=' or 'start=' not in i:
-                url += '+AND+{}'.format(i)
-            else:
+            if 'rows=' in i or 'start=' in i:
                 url += '&{}'.format(i)
+            else:
+                url += '+AND+{}'.format(i)
         return url
+
+    @staticmethod
+    def get_authors_abstract(raw_data):
+        keys = list(raw_data.keys())
+        author_index = keys.index("author_display")
+        abstract_index = keys.index("abstract")
+        margin = keys[author_index + 1:abstract_index + 2]
+        authors = [raw_data.get(key) for key in margin[:-2]]
+        abstract = [raw_data.get(key) for key in margin[-1:]]
+        return authors, abstract
 
     def to_json(self, article):
         """A function which takes a dictionary with structure of the PLOS
         results and transform it to a standardized format.
         """
-        article['author'] = []
-        for i in article['authors'].split(';  '):
-            article['author'].append({'name': i})
-        article['key_word'] = []
-        for j in article['term'].split(','):
-            article['key_word'].append({'key_word': j})
+        article['author'], article['key_word'], article['labels'], article[
+            'list_strategies'], article['pages'] = [], [], [], [], []
 
-        article['date'] = {'year': int(article['py'])}
-        article['journal'] = article.pop('pubtitle')
-        article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
+        list_authors, article['abstract'] = self.get_authors_abstract(article)
+        for i in list_authors:
+            article['author'].append({'name': i})
+
+        article['title'] = article['title_display']
+        article['date'] = {'year': int(article['publication_date'].split('-')[0])}
         article['provenance'] = 'PLOS'
         article['read'] = False
-        article['labels'], article['list_strategies'] = [], []
 
         article['key'], article['unique_key'] = self.create_keys(article)
-        post = {key: article[key] for key in self.keys()}
+        keys = self.keys()
+        keys.append('score')
+
+        post = {key: article[key] for key in keys}
 
         return post
 
     @staticmethod
-    def parse(root):
+    def xml_to_dict(branch):
+        """Branch to dictionary"""
+        article = OrderedDict()
+        for i, at in enumerate(branch.iter()):
+            key = (list(at.attrib.values()) or [i])[0]
+            article[key] = at.text
+        return article
+
+    def parse(self, root):
         """Removing unwanted branches."""
         parents = root.getchildren()
-        if not parents:
+        if len(parents[0]) == 0:
             articles = False
         else:
-            temp = {}
-            articles = []
-            for count, i in enumerate(parents[0].iter()):
-                if (count + 1) % 15 == 0:
-                    articles.append(temp)
-                    temp = {}
+            temp = self.xml_to_dict(parents[0])
+            articles = [OrderedDict()]
+            for key in temp:
+                if key == 'score':
+                    articles[-1].update({key: temp[key]})
+                    articles.append({})
                 else:
-                    temp.update({i.tag: i.text})
-        print(articles)
+                    articles[-1].update({key: temp[key]})
         return articles
 
     @staticmethod

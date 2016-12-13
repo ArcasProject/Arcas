@@ -32,17 +32,17 @@ class Springer(Api):
         for i in old_keys:
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
-        article['author'] = []
+
+        article['author'], article['key_word'], article['labels'], article[
+            'list_strategies'] = [], [], [], []
+
         for i in article['creator'].split(','):
             article['author'].append({'name': i})
 
         article['date'] = {
                 'year': int(article['publicationDate'].split('-')[0])}
         article['abstract'] = article.pop('p')
-
         article['journal'] = article.pop('publicationName')
-        article['key_word'] = []
-        article['labels'], article['list_strategies'] = [], []
         article['pages'] = ""
         article['provenance'] = 'Springer'
         article['read'] = False

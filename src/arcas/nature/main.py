@@ -24,7 +24,6 @@ class Nature(Api):
     def parse(root):
         """Removing unwanted branches."""
         parents = root.getchildren()[2]
-
         if not parents:
             articles = False
         else:
@@ -47,19 +46,18 @@ class Nature(Api):
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
 
-        article['author'] = []
+        article['author'], article['key_word'], article['labels'], article[
+            'list_strategies'] = [], [], [], []
+
         for i in article['creator'].split(',  '):
             article['author'].append({'name': i})
-        article['key_word'] = []
-
         article['abstract'] = article['description']
         article['date'] = {
             'year': int(article['publicationDate'].split('-')[0])}
-        article['journal'] = article.pop('publicationName')
+        article['journal'] = article.pop('publisher')
         article['pages'] = ""
         article['provenance'] = 'Nature'
         article['read'] = False
-        article['labels'], article['list_strategies'] = [], []
 
         article['key'], article['unique_key'] = self.create_keys(article)
 

@@ -18,21 +18,24 @@ class Arxiv(Api):
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
 
-        article['author'] = []
+        article['author'], article['key_word'], article['labels'], article[
+            'list_strategies'] = [], [], [], []
+
         for i in article['name'].split(','):
             article['author'].append({'name': i})
-
         article['date'] = {'year': int(article['published'].split('-')[0])}
-        if article['journal_ref'] is not None:
+        try:
             article['journal'] = article.pop('journal_ref')
-        else:
+        except:
             article['journal'] = "arXiv"
-        article['key_word'] = []
-        if article['primary_category'] is not None:
-            for i in article['primary_category']:
-                article['key_word'].append({'key_word': i})
+        try:
+            if article['primary_category']:
+                for i in article['primary_category']:
+                    article['key_word'].append({'key_word': i})
+        except:
+            pass
+
         article['abstract'] = article.pop('summary')
-        article['labels'], article['list_strategies'] = [], []
         article['pages'] = ""
         article['provenance'] = 'arXiv'
         article['read'] = False
