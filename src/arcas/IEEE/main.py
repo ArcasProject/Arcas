@@ -12,19 +12,26 @@ class Ieee(Api):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
         """
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'], article['key_word'] = [], []
 
-        for i in article['authors'].split(';  '):
-            article['author'].append({'name': i})
+        try:
+            for i in article['authors'].split(';  '):
+                article['author'].append({'name': i})
+        except:
+            article['author'].append({'name': "Empty Results"})
 
-        for j in article['term'].split(','):
-            article['key_word'].append({'key_word': j})
+        try:
+            for j in article['term'].split(','):
+                article['key_word'].append({'key_word': j})
+        except KeyError:
+            KeyError()
 
         article['date'] = {'year': int(article['py'])}
         article['journal'] = article.pop('pubtitle')
-        article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
-
+        try:
+            article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
+        except KeyError:
+            article['pages'] = ""
         article['provenance'] = 'IEEE'
         article['read'] = False
 

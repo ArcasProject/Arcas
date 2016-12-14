@@ -36,8 +36,7 @@ class Plos(Api):
         """A function which takes a dictionary with structure of the PLOS
         results and transform it to a standardized format.
         """
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'], article['pages'] = [], [], [], [], []
+        article['author'], article['key_word'], article['pages'] = [], [], []
 
         list_authors, article['abstract'] = self.get_authors_abstract(article)
         for i in list_authors:

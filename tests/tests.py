@@ -7,7 +7,7 @@ from xml.etree.ElementTree import Element
 from arcas.tools import Api
 
 keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date', 'journal',
-        'pages', 'labels', 'read', 'key_word', 'provenance', 'list_strategies']
+        'pages', 'read', 'key_word', 'provenance']
 
 article = {'title': 'A Title', 'abstract': 'The Abstract', 'date': {'year': 2016},
            'author': [{'name': 'Author'}]}
@@ -57,7 +57,13 @@ class TestTools(unittest.TestCase):
         post = dict()
         arguments['-b'], arguments['-t'] = 'Abstract', 'Title'
 
-        post['abstract'], post['title'] = 'Abstract', 'Title'
+        post['abstract'], post['title'] = 'abstract is a lot of sentences', \
+                                          ' where a title is only one.'
         self.assertTrue(self.api.validate_post(arguments, post))
 
+        arguments['-b'], arguments['-t'] = None, 'Title'
+        self.assertTrue(self.api.validate_post(arguments, post))
+
+        arguments['-b'], arguments['-t'] = 'Abstract', None
+        self.assertTrue(self.api.validate_post(arguments, post))
 

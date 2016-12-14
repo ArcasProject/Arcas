@@ -33,15 +33,17 @@ class Springer(Api):
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
 
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'], article['key_word'] = [], []
 
         for i in article['creator'].split(','):
             article['author'].append({'name': i})
 
         article['date'] = {
                 'year': int(article['publicationDate'].split('-')[0])}
-        article['abstract'] = article.pop('p')
+        try:
+            article['abstract'] = article.pop('p')
+        except KeyError:
+            article['abstract'] = "Empty Results "
         article['journal'] = article.pop('publicationName')
         article['pages'] = ""
         article['provenance'] = 'Springer'
@@ -65,10 +67,11 @@ class Springer(Api):
                 if obj.tag.split('}')[-1] == 'article':
                     articles.append({})
                 else:
-                    if obj.tag in articles[-1].keys():
+                    if obj.tag in articles[-1].keys() and obj.text is None:
                         articles[-1][obj.tag] += ' ' + obj.text
                     else:
-                        articles[-1].update({obj.tag: obj.text})
+                        if obj.text is None:
+                            articles[-1].update({obj.tag: obj.text})
             del articles[0]
 
         return articles

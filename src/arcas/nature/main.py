@@ -46,14 +46,16 @@ class Nature(Api):
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
 
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'], article['key_word'] = [], []
 
         for i in article['creator'].split(',  '):
             article['author'].append({'name': i})
         article['abstract'] = article['description']
-        article['date'] = {
-            'year': int(article['publicationDate'].split('-')[0])}
+        try:
+            article['date'] = {
+                'year': int(article['publicationDate'].split('-')[0])}
+        except:
+            article['date'] = 0
         article['journal'] = article.pop('publisher')
         article['pages'] = ""
         article['provenance'] = 'Nature'

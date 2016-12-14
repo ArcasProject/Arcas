@@ -18,8 +18,7 @@ class Arxiv(Api):
             keep = i.split('}')
             article[keep[-1]] = article.pop(i)
 
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'], article['key_word'] = [], []
 
         for i in article['name'].split(','):
             article['author'].append({'name': i})

@@ -55,8 +55,7 @@ class Api():
     @staticmethod
     def keys():
         keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word', 'provenance',
-                'list_strategies']
+                'journal', 'pages', 'read', 'key_word', 'provenance']
         return keys
 
     @staticmethod
@@ -111,12 +110,12 @@ class Api():
             - True of False
         """
         post = self.lower_case(post)
-        arguments = {k: v.lower() for k, v in arguments.items()}
-        word = arguments['-b'], arguments['-t']
-        check = post['abstract'], post['title']
-
-        return all([w in check for w in word if w is not None])
-
+        word = [arguments['-b'], arguments['-t']]
+        for i, wr in enumerate(word):
+            if wr is not None:
+                word[i] = wr.lower()
+        check = [post['abstract'], post['title']]
+        return all([w in check[_] for _, w in enumerate(word) if w is not None])
 
     def run(self, url, arguments, validate):
         """Putting everything together. Creates the url, makes the request,
