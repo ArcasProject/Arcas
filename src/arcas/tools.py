@@ -55,8 +55,7 @@ class Api():
     @staticmethod
     def keys():
         keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'labels', 'read', 'key_word', 'provenance',
-                'list_strategies']
+                'journal', 'pages', 'read', 'key_word', 'provenance']
         return keys
 
     @staticmethod
@@ -102,14 +101,14 @@ class Api():
 
     def validate_post(self, arguments, post):
         """
-                Checks if the query arguments abstract and title  were satisfied.
+               Checks if the query arguments abstract and title  were satisfied.
 
-                Parameters:
-                    - arguments
-                    - post
-                Returns:
-                    - True of False
-                """
+               Parameters:
+                   - arguments
+                   - post
+               Returns:
+                   - True of False
+               """
         post = self.lower_case(post)
         arguments = self.lower_case(arguments)
         word = [arguments['-b'], arguments['-t']]
@@ -123,7 +122,6 @@ class Api():
 
         return all(val)
 
-
     def run(self, url, arguments, validate):
         """Putting everything together. Creates the url, makes the request,
         transforms from xml to dict to a standardized format and output to
@@ -136,6 +134,7 @@ class Api():
             raise ValueError('Empty results at {}'.format(url))
         else:
             for record in articles:
+                print(record)
                 post = self.to_json(record)
 
                 if validate is True:

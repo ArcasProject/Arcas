@@ -13,30 +13,32 @@ class Arxiv(Api):
         """A function which takes a dictionary with structure of the arXiv
         results and transform it to a standardized format.
         """
-        old_keys = list(article.keys())
-        for i in old_keys:
-            keep = i.split('}')
-            article[keep[-1]] = article.pop(i)
+        article = {k.split('}')[-1]: v for k, v in article.items()}
+        article['author'] = article.get('name', None)
+        article['key_word'] = article.get('primary_category', None)
 
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        if article['author'] is not None:
+            article['author'] = [{'name': author} for author in article[
+                'author'].split(',')]
+        else:
+            article['author'] = [{'name': str(None)}]
 
-        for i in article['name'].split(','):
-            article['author'].append({'name': i})
-        article['date'] = {'year': int(article['published'].split('-')[0])}
-        try:
-            article['journal'] = article.pop('journal_ref')
-        except:
+        if article['key_word'] is not None:
+            article['key_word'] = [{'key_word': word} for word in
+                                   article['primary_category']]
+        else:
+            article['key_word'] = [{'key_word': str(None)}]
+
+        article['date'] = {'year': int(article.get('published', '0').split('-')[
+                                                       0])}
+
+        article['journal'] = article.get('journal_ref', None)
+        if article['journal'] is None:
             article['journal'] = "arXiv"
-        try:
-            if article['primary_category']:
-                for i in article['primary_category']:
-                    article['key_word'].append({'key_word': i})
-        except:
-            pass
 
-        article['abstract'] = article.pop('summary')
-        article['pages'] = ""
+        article['abstract'] = article.get('summary', None)
+        article['title'] = article.get('title', None)
+        article['pages'] = " "
         article['provenance'] = 'arXiv'
         article['read'] = False
 

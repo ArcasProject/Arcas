@@ -41,21 +41,26 @@ class Nature(Api):
         """A function which takes a dictionary with structure of the nature
         results and transform it to a standardized format.
         """
-        old_keys = list(article.keys())
-        for i in old_keys:
-            keep = i.split('}')
-            article[keep[-1]] = article.pop(i)
+        article = {k.split('}')[-1]: v for k, v in article.items()}
 
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'] = article.get('creator', None)
 
-        for i in article['creator'].split(',  '):
-            article['author'].append({'name': i})
-        article['abstract'] = article['description']
-        article['date'] = {
-            'year': int(article['publicationDate'].split('-')[0])}
-        article['journal'] = article.pop('publisher')
-        article['pages'] = ""
+        if article['author'] is not None:
+            article['author'] = [{'name': author} for author in article[
+                'author'].split(', ')]
+        else:
+            article['author'] = [{'name': str(None)}]
+
+        if article['publicationDate'] is not None:
+            article['date'] = {'year': int(article.get('publicationDate').split('-')[
+                                           0])}
+        else:
+            article['date'] = {'year': 0}
+        article['key_word'] = [{'key_word': str(None)}]
+
+        article['abstract'] = article.get('description', 'None')
+        article['journal'] = article.get('publisher')
+        article['pages'] = " "
         article['provenance'] = 'Nature'
         article['read'] = False
 

@@ -28,22 +28,24 @@ class Springer(Api):
         """A function which takes a dictionary with structure of the Springer
         results and transform it to a standardized format.
         """
-        old_keys = list(article.keys())
-        for i in old_keys:
-            keep = i.split('}')
-            article[keep[-1]] = article.pop(i)
+        article = {k.split('}')[-1]: v for k, v in article.items()}
 
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'] = article.get('creator', None)
 
-        for i in article['creator'].split(','):
-            article['author'].append({'name': i})
+        if article['author'] is not None:
+            article['author'] = [{'name': author} for author in article[
+                'author'].split(',')]
+        else:
+            article['author'] = [{'name': str(None)}]
 
         article['date'] = {
-                'year': int(article['publicationDate'].split('-')[0])}
-        article['abstract'] = article.pop('p')
-        article['journal'] = article.pop('publicationName')
-        article['pages'] = ""
+                'year': int(article.get('publicationDate', '0').split('-')[0])}
+
+        article['abstract'] = article.get('p', 'None')
+        article['title'] = article.get('title', 'None')
+        article['journal'] = article.get('publicationName', 'None')
+        article['key_word'] = [{'key_word': 'None'}]
+        article['pages'] = " "
         article['provenance'] = 'Springer'
         article['read'] = False
 
@@ -65,10 +67,11 @@ class Springer(Api):
                 if obj.tag.split('}')[-1] == 'article':
                     articles.append({})
                 else:
-                    if obj.tag in articles[-1].keys():
+                    if obj.tag in articles[-1].keys() and obj.text is None:
                         articles[-1][obj.tag] += ' ' + obj.text
                     else:
-                        articles[-1].update({obj.tag: obj.text})
+                        if obj.text is not None:
+                            articles[-1].update({obj.tag: obj.text})
             del articles[0]
 
         return articles

@@ -29,7 +29,7 @@ Arcas used docopt to pass a list of arguments.
 For example:
 
 ```
->>>python arcas_scrape -p arxiv -t Prisoner's Dilemma -y 2000 -r 1
+>>> python arcas_scrape -p arxiv -t Prisoner's Dilemma -y 2000 -r 1
 ```
 This query pings the arXiv api and ask for 1 record with title containing the 
 words Prisoner's Dilemma and published year 2000. 

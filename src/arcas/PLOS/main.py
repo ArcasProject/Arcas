@@ -25,26 +25,40 @@ class Plos(Api):
     @staticmethod
     def get_authors_abstract(raw_data):
         keys = list(raw_data.keys())
-        author_index = keys.index("author_display")
-        abstract_index = keys.index("abstract")
-        margin = keys[author_index + 1:abstract_index + 2]
-        authors = [raw_data.get(key) for key in margin[:-2]]
-        abstract = [raw_data.get(key) for key in margin[-1:]]
-        return authors, abstract
+        try:
+            author_index = keys.index("author_display")
+            abstract_index = keys.index("abstract")
+
+            margin = keys[author_index + 1:abstract_index + 2]
+            authors = [raw_data.get(key) for key in margin[:-2]]
+            abstract = [raw_data.get(key) for key in margin[-1:]]
+            return authors, abstract[0]
+        except ValueError:
+            authors, abstract = ['None'], ['None']
+            return authors, abstract[0]
 
     def to_json(self, article):
         """A function which takes a dictionary with structure of the PLOS
         results and transform it to a standardized format.
         """
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'], article['pages'] = [], [], [], [], []
-
+        article['author'] = []
         list_authors, article['abstract'] = self.get_authors_abstract(article)
         for i in list_authors:
             article['author'].append({'name': i})
 
-        article['title'] = article['title_display']
-        article['date'] = {'year': int(article['publication_date'].split('-')[0])}
+        article['title'] = article.get('title_display', 'None')
+
+        article['date'] = article.get('publication_date', None)
+        if article['date'] is not None:
+            article['date'] = {'year': int(article.get('date').split('-')[
+                                           0])}
+        else:
+            article['date'] = {'year': 0}
+
+        article['journal'] = article.get('journal', 'None')
+        article['score'] = article.get('score', 'None')
+        article['pages'] = " "
+        article['key_word'] = [{'key_word': 'None'}]
         article['provenance'] = 'PLOS'
         article['read'] = False
 
@@ -56,14 +70,14 @@ class Plos(Api):
 
         return post
 
-    @staticmethod
-    def xml_to_dict(branch):
-        """Branch to dictionary"""
-        article = OrderedDict()
-        for i, at in enumerate(branch.iter()):
-            key = (list(at.attrib.values()) or [i])[0]
-            article[key] = at.text
-        return article
+#    @staticmethod
+#    def xml_to_dict(branch):
+#        """Branch to dictionary"""
+#        article = OrderedDict()
+#        for i, at in enumerate(branch.iter()):
+#            key = (list(at.attrib.values()) or [i])[0]
+#            article[key] = at.text
+#        return article
 
     def parse(self, root):
         """Removing unwanted branches."""
@@ -71,14 +85,15 @@ class Plos(Api):
         if len(parents[0]) == 0:
             articles = False
         else:
-            temp = self.xml_to_dict(parents[0])
             articles = [OrderedDict()]
-            for key in temp:
+            for i, records in enumerate(parents[0].iter()):
+                key = (list(records.attrib.values()) or [i])[0]
                 if key == 'score':
-                    articles[-1].update({key: temp[key]})
-                    articles.append({})
+                    articles[-1].update({key: records.text})
+                    articles.append(OrderedDict())
                 else:
-                    articles[-1].update({key: temp[key]})
+                    articles[-1].update({key: records.text})
+            del articles[-1]
         return articles
 
     @staticmethod

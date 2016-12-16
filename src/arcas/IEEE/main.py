@@ -12,18 +12,27 @@ class Ieee(Api):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
         """
-        article['author'], article['key_word'], article['labels'], article[
-            'list_strategies'] = [], [], [], []
+        article['author'] = article.get('authors', None)
+        article['key_word'] = article.get('term', None)
 
-        for i in article['authors'].split(';  '):
-            article['author'].append({'name': i})
+        if article['author'] is not None:
+            article['author'] = [{'name': author} for author in article[
+                'author'].split('; ')]
+        else:
+            article['author'] = [{'name': str(None)}]
 
-        for j in article['term'].split(','):
-            article['key_word'].append({'key_word': j})
+        if article['key_word'] is not None:
+            article['key_word'] = [{'key_word': word} for word in article[
+                                                         'key_word'].split(',')]
+        else:
+            article['key_word'] = [{'key_word': str(None)}]
 
-        article['date'] = {'year': int(article['py'])}
-        article['journal'] = article.pop('pubtitle')
-        article['pages'] = '{}-{}'.format(article['spage'], article['epage'])
+        article['date'] = {'year': int(article.get('py', '0'))}
+        article['journal'] = article.get('pubtitle', 'None')
+        article['pages'] = '{}-{}'.format(article.get('spage', 'None'),
+                                          article.get('epage', 'None'))
+        article['abstract'] = article.get('abstract', 'None')
+        article['title'] = article.get('title', 'None')
 
         article['provenance'] = 'IEEE'
         article['read'] = False
