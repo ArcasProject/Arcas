@@ -1,6 +1,5 @@
 from arcas.tools import Api
 from xml.etree import ElementTree
-from collections import OrderedDict
 
 
 class Plos(Api):
@@ -9,6 +8,15 @@ class Plos(Api):
     """
     def __init__(self):
         self.standard = 'http://api.plos.org/search?q='
+
+    @staticmethod
+    def keys():
+        """
+        Fields we are keeping from Springer results.
+        """
+        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
+                'date', 'journal', 'provenance', 'score']
+        return keys
 
     def create_url_search(self, parameters):
         """Creates the search url, combining the standard url and various
@@ -22,79 +30,63 @@ class Plos(Api):
                 url += '+AND+{}'.format(i)
         return url
 
-    @staticmethod
-    def get_authors_abstract(raw_data):
-        keys = list(raw_data.keys())
-        try:
-            author_index = keys.index("author_display")
-            abstract_index = keys.index("abstract")
-
-            margin = keys[author_index + 1:abstract_index + 2]
-            authors = [raw_data.get(key) for key in margin[:-2]]
-            abstract = [raw_data.get(key) for key in margin[-1:]]
-            return authors, abstract[0]
-        except ValueError:
-            authors, abstract = ['None'], ['None']
-            return authors, abstract[0]
-
-    def to_json(self, article):
+    def to_dataframe(self, raw_article):
         """A function which takes a dictionary with structure of the PLOS
         results and transform it to a standardized format.
         """
-        article['author'] = []
-        list_authors, article['abstract'] = self.get_authors_abstract(article)
-        for i in list_authors:
-            article['author'].append({'name': i})
+        raw_article['author'] = raw_article.get('author_display', None)
+        try:
+            raw_article['abstract'] = raw_article.get('abstract', [None])[0]
+        except IndexError:
+            raw_article['abstract'] = None
 
-        article['title'] = article.get('title_display', 'None')
+        raw_article['date'] = int(raw_article.get('publication_date', '0').split('-')[0])
+        raw_article['journal'] = raw_article.get('journal', None)
+        raw_article['provenance'] = 'PLOS'
+        raw_article['score'] = raw_article.get('score', None)
+        raw_article['title'] = raw_article.get('title_display', None)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(
+            raw_article)
 
-        article['date'] = article.get('publication_date', None)
-        if article['date'] is not None:
-            article['date'] = {'year': int(article.get('date').split('-')[
-                                           0])}
-        else:
-            article['date'] = {'year': 0}
+        return self.dict_to_dataframe(raw_article)
 
-        article['journal'] = article.get('journal', 'None')
-        article['score'] = article.get('score', 'None')
-        article['pages'] = " "
-        article['key_word'] = [{'key_word': 'None'}]
-        article['provenance'] = 'PLOS'
-        article['read'] = False
-
-        article['key'], article['unique_key'] = self.create_keys(article)
-        keys = self.keys()
-        keys.append('score')
-
-        post = {key: article[key] for key in keys}
-
-        return post
-
-#    @staticmethod
-#    def xml_to_dict(branch):
-#        """Branch to dictionary"""
-#        article = OrderedDict()
-#        for i, at in enumerate(branch.iter()):
-#            key = (list(at.attrib.values()) or [i])[0]
-#            article[key] = at.text
-#        return article
+    @staticmethod
+    def xml_to_dict(record):
+        """Xml response with information on article to dictionary"""
+        d = {}
+        for key, value in record:
+            if key is not None:
+                if value is not None:
+                    d[key] = value
+                else:
+                    d[key] = []
+                    current_key = key
+            else:
+                if value is not None:
+                    d[current_key].append(value)
+        return d
 
     def parse(self, root):
-        """Removing unwanted branches."""
+        """Parsing the xml file"""
         parents = root.getchildren()
         if len(parents[0]) == 0:
-            articles = False
+            return False
         else:
-            articles = [OrderedDict()]
-            for i, records in enumerate(parents[0].iter()):
-                key = (list(records.attrib.values()) or [i])[0]
+            raw_articles = [[]]
+            for at in parents[0].iter():
+                try:
+                    key = list(at.attrib.values())[0]
+                except IndexError:
+                    key = None
                 if key == 'score':
-                    articles[-1].update({key: records.text})
-                    articles.append(OrderedDict())
+                    raw_articles[-1].append((key, at.text))
+                    raw_articles.append([])
                 else:
-                    articles[-1].update({key: records.text})
-            del articles[-1]
-        return articles
+                    raw_articles[-1].append((key, at.text))
+            while [] in raw_articles:
+                raw_articles.remove([])
+
+        return [self.xml_to_dict(raw_article) for raw_article in raw_articles]
 
     @staticmethod
     def parameters_fix(arguments):

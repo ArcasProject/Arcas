@@ -9,57 +9,50 @@ class Arxiv(Api):
     def __init__(self):
         self.standard = 'http://export.arxiv.org/api/query?search_query='
 
-    def to_json(self, article):
+    @staticmethod
+    def keys():
+        """
+        Fields we are keeping from arXiv results.
+        """
+        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
+                'date', 'journal', 'provenance']
+        return keys
+
+    def to_dataframe(self, raw_article):
         """A function which takes a dictionary with structure of the arXiv
         results and transform it to a standardized format.
         """
-        article = {k.split('}')[-1]: v for k, v in article.items()}
-        article['author'] = article.get('name', None)
-        article['key_word'] = article.get('primary_category', None)
+        raw_article = {k.split('}')[-1]: v for k, v in raw_article.items()}
 
-        if article['author'] is not None:
-            article['author'] = [{'name': author} for author in article[
-                'author'].split(',')]
-        else:
-            article['author'] = [{'name': str(None)}]
+        raw_article['author'] = raw_article.get('name', None)
+        if raw_article['author'] is not None:
+            raw_article['author'] = raw_article['author'].split(',')
 
-        if article['key_word'] is not None:
-            article['key_word'] = [{'key_word': word} for word in
-                                   article['primary_category']]
-        else:
-            article['key_word'] = [{'key_word': str(None)}]
+        raw_article['abstract'] = raw_article.get('summary', None)
+        raw_article['date'] = int(raw_article.get('published', '0').split('-')[0])
+        raw_article['journal'] = raw_article.get('journal_ref', None)
+        if raw_article['journal'] is None:
+            raw_article['journal'] = "arXiv"
 
-        article['date'] = {'year': int(article.get('published', '0').split('-')[
-                                                       0])}
+        raw_article['provenance'] = 'arXiv'
+        raw_article['title'] = raw_article.get('title', None)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(
+            raw_article)
 
-        article['journal'] = article.get('journal_ref', None)
-        if article['journal'] is None:
-            article['journal'] = "arXiv"
-
-        article['abstract'] = article.get('summary', None)
-        article['title'] = article.get('title', None)
-        article['pages'] = " "
-        article['provenance'] = 'arXiv'
-        article['read'] = False
-
-        article['key'], article['unique_key'] = self.create_keys(article)
-
-        post = {key: article[key] for key in self.keys()}
-
-        return post
+        return self.dict_to_dataframe(raw_article)
 
     def parse(self, root):
         """Removing unwanted branches."""
         parents = root.getchildren()
-        articles = []
+        raw_articles = []
         for _ in range(7):
             parents.remove(parents[0])
         if not parents:
-            articles = False
+            raw_articles = False
         else:
             for record in parents:
-                articles.append(self.xml_to_dict(record))
-        return articles
+                raw_articles.append(self.xml_to_dict(record))
+        return raw_articles
 
     @staticmethod
     def parameters_fix(arguments):

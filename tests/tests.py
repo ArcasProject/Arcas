@@ -1,16 +1,13 @@
 import unittest
-import collections
 import requests_mock
 from hypothesis import given
 import hypothesis.strategies as st
+import pandas as pd
 from xml.etree.ElementTree import Element
 from arcas.tools import Api
 
-keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date', 'journal',
-        'pages', 'read', 'key_word', 'provenance']
-
-article = {'title': 'A Title', 'abstract': 'The Abstract', 'date': {'year': 2016},
-           'author': [{'name': 'Author'}]}
+article = {'title': 'A Title', 'abstract': 'The Abstract', 'date':  2016,
+           'author': ['Author']}
 
 
 class TestTools(unittest.TestCase):
@@ -41,10 +38,7 @@ class TestTools(unittest.TestCase):
         root.extend(children)
 
         dummy_dict = self.api.xml_to_dict(root)
-        self.assertEqual(type(dummy_dict), collections.defaultdict)
-
-    def test_key(self):
-        self.assertEqual(keys, self.api.keys())
+        self.assertEqual(type(dummy_dict), dict)
 
     def test_create_keys(self):
         key, unique_key = self.api.create_keys(article)
@@ -54,16 +48,21 @@ class TestTools(unittest.TestCase):
 
     def test_validate(self):
         arguments = dict()
-        post = dict()
-        arguments['-b'], arguments['-t'] = 'Abstract', 'Title'
+        d = [{'title': 'title', 'abstract': 'This is a good abstract'},
+             {'title': 'title', 'abstract': 'This is a good abstract'},
+             {'title': 'title', 'abstract': 'This is a good abstract'}]
+        df = pd.DataFrame(d)
+        arguments['-b'], arguments['-t'], arguments['-a'] = 'Is Abstract', \
+                                                            'Title',\
+                                                            'Glynatsi'
 
-        post['abstract'], post['title'] = 'abstract is a lot of sentences', \
-                                          ' where a title is only one.'
-        self.assertTrue(self.api.validate_post(arguments, post))
+        self.assertTrue(self.api.validate_post(arguments, df))
 
         arguments['-b'], arguments['-t'] = None, 'Title'
-        self.assertTrue(self.api.validate_post(arguments, post))
+        self.assertTrue(self.api.validate_post(arguments, df))
 
         arguments['-b'], arguments['-t'] = 'Abstract', None
-        self.assertTrue(self.api.validate_post(arguments, post))
+        self.assertTrue(self.api.validate_post(arguments, df))
 
+        arguments['-b'], arguments['-t'] = None, None
+        self.assertTrue(self.api.validate_post(arguments, df))

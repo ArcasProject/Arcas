@@ -18,7 +18,7 @@ Options:
     -r RECORDS             Number of records to fetch
     -s START               Sequence number of first record to fetch
     -v VALIDATE            Checks if query returned with arguments asked [default: False]
-    -f FILENAME            Name of json file [default: results]
+    -f FILENAME            Name of json file [default: results.json]
 """
 
 from arcas import *
@@ -45,4 +45,3 @@ if __name__ == '__main__':
 
     # generate the formalized json and export it
     post = api.run(url, arguments, validate)
-    write = api.export(post, filename=arguments['-f'])

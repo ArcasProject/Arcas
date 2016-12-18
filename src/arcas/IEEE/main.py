@@ -8,55 +8,54 @@ class Ieee(Api):
     def __init__(self):
         self.standard = 'http://ieeexplore.ieee.org/gateway/ipsSearch.jsp?'
 
-    def to_json(self, article):
+    @staticmethod
+    def keys():
+        """
+        Fields we are keeping from IEEE results.
+        """
+        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
+                'date', 'journal', 'pages', 'key_word', 'provenance']
+        return keys
+
+    def to_dataframe(self, raw_article):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
         """
-        article['author'] = article.get('authors', None)
-        article['key_word'] = article.get('term', None)
+        raw_article['author'] = raw_article.get('authors', None)
+        if raw_article['author'] is not None:
+            raw_article['author'] = raw_article['author'].split('; ')
 
-        if article['author'] is not None:
-            article['author'] = [{'name': author} for author in article[
-                'author'].split('; ')]
-        else:
-            article['author'] = [{'name': str(None)}]
+        raw_article['abstract'] = raw_article.get('abstract', None)
+        raw_article['date'] = int(raw_article.get('py', 0))
+        raw_article['journal'] = raw_article.get('pubtitle', 'None')
+        raw_article['pages'] = '{}-{}'.format(raw_article.get('spage', None),
+                                              raw_article.get('epage', None))
 
-        if article['key_word'] is not None:
-            article['key_word'] = [{'key_word': word} for word in article[
-                                                         'key_word'].split(',')]
-        else:
-            article['key_word'] = [{'key_word': str(None)}]
+        raw_article['key_word'] = raw_article.get('term', None)
+        if raw_article['key_word'] is not None:
+            raw_article['key_word'] = raw_article['key_word'].split(',')
 
-        article['date'] = {'year': int(article.get('py', '0'))}
-        article['journal'] = article.get('pubtitle', 'None')
-        article['pages'] = '{}-{}'.format(article.get('spage', 'None'),
-                                          article.get('epage', 'None'))
-        article['abstract'] = article.get('abstract', 'None')
-        article['title'] = article.get('title', 'None')
+        raw_article['provenance'] = 'IEEE'
+        raw_article['title'] = raw_article.get('title', None)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(
+            raw_article)
 
-        article['provenance'] = 'IEEE'
-        article['read'] = False
-
-        article['key'], article['unique_key'] = self.create_keys(article)
-
-        post = {key: article[key] for key in self.keys()}
-
-        return post
+        return self.dict_to_dataframe(raw_article)
 
     def parse(self, root):
-        """Removing unwanted branches."""
+        """Parsing the xml file"""
         try:
             parents = root.getchildren()
-            articles = []
+            raw_articles = []
             for _ in range(2):
                 parents.remove(parents[0])
 
             for record in parents:
-                articles.append(self.xml_to_dict(record))
-        except:
-            articles = False
+                raw_articles.append(self.xml_to_dict(record))
+        except IndexError:
+            raw_articles = False
 
-        return articles
+        return raw_articles
 
     @staticmethod
     def parameters_fix(arguments):

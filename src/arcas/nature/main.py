@@ -8,6 +8,15 @@ class Nature(Api):
     def __init__(self):
         self.standard = 'http://www.nature.com/opensearch/request?queryType=cql&query='
 
+    @staticmethod
+    def keys():
+        """
+        Fields we are keeping from Springer results.
+        """
+        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
+                'date', 'journal', 'key_word', 'provenance']
+        return keys
+
     def create_url_search(self, parameters):
         """Creates the search url, combining the standard url and various
         search parameters."""
@@ -21,54 +30,60 @@ class Nature(Api):
         return url
 
     @staticmethod
-    def parse(root):
-        """Removing unwanted branches."""
-        parents = root.getchildren()[2]
-        if not parents:
-            articles = False
-        else:
-            temp = {}
-            articles = []
-            for count, i in enumerate(parents.iter()):
-                if i.tag.split('}')[-1] == 'recordPosition':
-                    articles.append(temp)
-                    temp = {}
-                else:
-                    temp.update({i.tag: i.text})
-        return articles
+    def xml_to_dict(records):
+        """Xml response with information on article to dictionary"""
+        d = {}
+        for key, value in records:
+            if key not in d:
+                d[key] = value
+            else:
+                value = value.replace(',', ' ')
+                d[key] += ',' + value
+        return d
 
-    def to_json(self, article):
+    def parse(self, root):
+        """Parsing the xml file"""
+        parents = root.getchildren()
+        diagnostics = parents[3].tag.split('}')[-1]
+        number_of_records = parents[0].text
+        if (diagnostics == 'diagnostics') or (number_of_records == '0'):
+            return False
+        else:
+            parents = parents[2]
+            raw_articles = [[]]
+            for at in parents.iter():
+                key = at.tag.split('}')[-1]
+                if key == 'recordPosition':
+                    raw_articles.append([])
+                else:
+                   raw_articles[-1].append((key, at.text))
+
+            while [] in raw_articles:
+                raw_articles.remove([])
+
+        return [self.xml_to_dict(raw_article) for raw_article in raw_articles]
+
+    def to_dataframe(self, raw_article):
         """A function which takes a dictionary with structure of the nature
         results and transform it to a standardized format.
         """
-        article = {k.split('}')[-1]: v for k, v in article.items()}
+        raw_article['author'] = raw_article.get('creator', None)
+        if raw_article['author'] is not None:
+            raw_article['author'] = raw_article['author'].split(',')
 
-        article['author'] = article.get('creator', None)
+        raw_article['abstract'] = raw_article.get('description', None)
+        raw_article['date'] = int(raw_article.get('publicationDate', '0').split('-')[0])
+        raw_article['journal'] = raw_article.get('publisher', None)
 
-        if article['author'] is not None:
-            article['author'] = [{'name': author} for author in article[
-                'author'].split(', ')]
-        else:
-            article['author'] = [{'name': str(None)}]
+        raw_article['key_word'] = raw_article.get('subject', None)
+        if raw_article['key_word'] is not None:
+            raw_article['key_word'] = raw_article['key_word'].split(',')
 
-        if article['publicationDate'] is not None:
-            article['date'] = {'year': int(article.get('publicationDate').split('-')[
-                                           0])}
-        else:
-            article['date'] = {'year': 0}
-        article['key_word'] = [{'key_word': str(None)}]
+        raw_article['provenance'] = 'Nature'
+        raw_article['title'] = raw_article.get('title', None)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
-        article['abstract'] = article.get('description', 'None')
-        article['journal'] = article.get('publisher')
-        article['pages'] = " "
-        article['provenance'] = 'Nature'
-        article['read'] = False
-
-        article['key'], article['unique_key'] = self.create_keys(article)
-
-        post = {key: article[key] for key in self.keys()}
-
-        return post
+        return self.dict_to_dataframe(raw_article)
 
     @staticmethod
     def parameters_fix(arguments):

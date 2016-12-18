@@ -1,44 +1,40 @@
 import unittest
 from hypothesis import given
 import hypothesis.strategies as st
+from hypothesis.extra.datetime import dates
 from arcas.arXiv.main import Arxiv
 
 arxiv_entry = st.fixed_dictionaries(
-                   {'{http://arxiv.org/schemas/atom}affiliation': st.text(
-                       min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}author': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}category': st.booleans(),
-                    '{http://arxiv.org/schemas/atom}comment': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}doi': st.text(min_size=5,
-                                                                  max_size=20),
-                    '{http://arxiv.org/schemas/atom}entry': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}id': st.text(min_size=5,
-                                                                 max_size=20),
-                    '{http://arxiv.org/schemas/atom}journal_ref': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}link': st.booleans(),
-                    '{http://arxiv.org/schemas/atom}name': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}primary_category':
-                        st.lists(st.text(min_size=5, max_size=20)),
-                    '{http://arxiv.org/schemas/atom}summary': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}title': st.text(
-                        min_size=5, max_size=20),
-                    '{http://arxiv.org/schemas/atom}updated': st.text(
-                        min_size=5, max_size=20)
+                   {'{http://}affiliation': st.text(min_size=5, max_size=5),
+                    '{http://}author': st.text(min_size=5, max_size=5),
+                    '{http://}category': st.booleans(),
+                    '{http://}comment': st.text(min_size=5, max_size=5),
+                    '{http://}doi': st.text(min_size=5, max_size=5),
+                    '{http://}entry': st.text(min_size=5, max_size=5),
+                    '{http://}id': st.text(min_size=5, max_size=5),
+                    '{http://}journal_ref': st.text(min_size=5, max_size=5),
+                    '{http://}link': st.booleans(),
+                    '{http://}name': st.lists(elements=st.text(min_size=5,
+                                                               max_size=5),
+                                              min_size=5, max_size=5,
+                                              unique=True),
+                    '{http://}primary_category': st.text(min_size=5,
+                                                         max_size=5),
+                    '{http://}summary': st.text(min_size=5, max_size=5),
+                    '{http://}title': st.text(min_size=5, max_size=5),
+                    '{http://}updated': st.text(min_size=5, max_size=5),
                     })
 
 dummy_arguments = st.fixed_dictionaries(
-                    {'-a': st.text(),
-                     '-t': st.text(),
-                     '-b': st.text(),
-                     '-r': st.text(),
-                     '-s': st.text()
+                    {'-a': st.text(min_size=5, max_size=5),
+                     '-t': st.text(min_size=5, max_size=5),
+                     '-b': st.text(min_size=5, max_size=5),
+                     '-r': st.text(min_size=5, max_size=5),
+                     '-s': st.text(min_size=5, max_size=5)
                      })
+
+arxiv_keys = ['key', 'unique_key', 'title', 'author', 'abstract',
+              'date', 'journal', 'provenance']
 
 
 class TestArxiv(unittest.TestCase):
@@ -46,12 +42,27 @@ class TestArxiv(unittest.TestCase):
     def setUp(self):
         self.api = Arxiv()
 
+    def test_keys(self):
+        keys = self.api.keys()
+        self.assertEqual(keys, arxiv_keys)
+
     @given(arxiv_entry)
     def test_to_json(self, entry):
 
-        entry['{http://arxiv.org/schemas/atom}published'] = '12-12-2016'
-        post = self.api.to_json(entry)
-        self.assertEqual(sorted(post.keys()), sorted(self.api.keys()))
+        a_date = dates(min_year=1000, max_year=2017).example()
+        a_date = [str(a_date.year), str(a_date.month), str(a_date.day)]
+        entry['{http://}published'] = '-'.join(a_date)
+        entry['{http://}name'] = ','.join(entry['{http://}name'])
+
+        df = self.api.to_dataframe(entry)
+
+        self.assertEqual(df['title'][0], entry['{http://}title'])
+        self.assertEqual(list(df['author'].unique()), entry['{'
+                                                          'http://}name'].split(','))
+        self.assertEqual(df['abstract'][0], entry['{http://}summary'])
+        self.assertEqual(df['date'][0], int(entry['{http://}published'].split('-')[0]))
+        self.assertEqual(df['journal'][0], entry['{http://}journal_ref'])
+        self.assertEqual(df['provenance'][0], 'arXiv')
 
     @given(dummy_arguments)
     def test_parameters(self, arguments):

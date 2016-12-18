@@ -1,9 +1,9 @@
 from xml.etree import ElementTree
-from collections import defaultdict
 
-import json
 import requests
 import hashlib
+import itertools
+import pandas as pd
 from ratelimit import *
 
 
@@ -42,24 +42,22 @@ class Api():
         return response
 
     @staticmethod
-    def xml_to_dict(branch):
-        """Branch to dictionary"""
-        article = defaultdict()
-        for at in branch.iter():
-            if at.tag in article and at.text is not None:
-                article[at.tag] += ',{}'.format(at.text)
+    def xml_to_dict(record):
+        """Xml response with information on article to dictionary"""
+        d = {}
+        for at in record.iter():
+            if at.tag in d and at.text is not None:
+                d[at.tag] += ',{}'.format(at.text)
             else:
-                article.update({at.tag: at.text})
-        return article
+                d.update({at.tag: at.text})
+        return d
 
     @staticmethod
     def keys():
-        keys = ['key', 'unique_key', 'title', 'abstract', 'author', 'date',
-                'journal', 'pages', 'read', 'key_word', 'provenance']
-        return keys
+        pass
 
     @staticmethod
-    def to_json(article):
+    def to_dataframe(raw_article):
         pass
 
     @staticmethod
@@ -83,14 +81,18 @@ class Api():
         return post
 
     @staticmethod
-    def create_keys(article):
-        """Returns public key 'AuthorYear' and
+    def create_keys(raw_article):
+        """
+        Returns public key 'AuthorYear' and
         unique key hash('Author''Title''Year''Abstract')
         """
-        full_name = article['author'][0]['name'].split(' ')
-        year = article['date']['year']
-        string = '{}{}{}{}'.format(full_name[-1], article['title'], year,
-                                   article['abstract'])
+        try:
+            full_name = raw_article['author'][0].split(' ')
+        except TypeError:
+            full_name = [None]
+        year = raw_article['date']
+        string = '{}{}{}{}'.format(full_name[-1], raw_article['title'], year,
+                                   raw_article['abstract'])
 
         hash_object = hashlib.md5(string.encode('utf-8'))
 
@@ -99,59 +101,80 @@ class Api():
 
         return key, unique_key
 
-    def validate_post(self, arguments, post):
+    def dict_to_dataframe(self, raw_article):
         """
-               Checks if the query arguments abstract and title  were satisfied.
+        Takes a dictionary and returns a dataframe
+        """
+        values = []
+        for key in self.keys():
+            if type(raw_article[key]) is not list:
+                values.append([raw_article[key]])
+            else:
+                values.append(raw_article[key])
+        data = []
+        for row in itertools.product(*values):
+            data.append(row)
+        df = pd.DataFrame(data, columns=self.keys())
+        return df
 
-               Parameters:
-                   - arguments
-                   - post
-               Returns:
-                   - True of False
-               """
-        post = self.lower_case(post)
+    def validate_post(self, arguments, df):
+        """
+        Checks if the query arguments abstract and title  were satisfied.
+
+        Parameters:
+            - arguments
+            - post
+        Returns:
+           - True of False
+        """
         arguments = self.lower_case(arguments)
         word = [arguments['-b'], arguments['-t']]
-        check = [post['abstract'], post['title']]
 
+        fields = ['abstract', 'title']
+        check = [list(df[f].unique()) for f in fields]
         val = []
-        for _, w in enumerate(word):
+        for i, w in enumerate(word):
             if w is not None:
-                for i in w.split(' '):
-                    val.append(i in check[_])
-
+                for j in w.split(' '):
+                    if check[i][0] is not None:
+                        val.append(j in check[i][0].lower())
         return all(val)
 
+    @staticmethod
+    def export(df, filename):
+        """ Write the results to a json file
+        """
+        df.to_json(filename)
+
     def run(self, url, arguments, validate):
-        """Putting everything together. Creates the url, makes the request,
+        """Putting everything together. Makes the request,
         transforms from xml to dict to a standardized format and output to
         json file.
         """
         response = self.make_request(url)
         root = self.get_root(response)
-        articles = self.parse(root)
-        if not articles:
+        raw_articles = self.parse(root)
+        if not raw_articles:
             raise ValueError('Empty results at {}'.format(url))
         else:
-            for record in articles:
-                print(record)
-                post = self.to_json(record)
+            dfs = []
+            for raw_article in raw_articles:
+                df = self.to_dataframe(raw_article)
 
                 if validate is True:
                     try:
-                        self.validate_post(arguments, post)
+                        self.validate_post(arguments, df)
                     except:
-                        string = "Query was not satisfied for article with " \
-                                 "citation  key{} and unique key:{}".format(
-                                  post['key'], post['unique_key'])
+                        string = "Validation for article '{}', with " \
+                                 "citation  key:{}.".format(
+                                  df['title'], df['key'])
                         raise NotImplementedError(string)
-                return post
 
-    @staticmethod
-    def export(post, filename):
-        """ Write the results to a json file
-        """
-        with open('{}.json'.format(filename), 'a') as jsonfile:
-            json.dump(post, jsonfile)
+                dfs.append(df)
+            df = pd.concat(dfs, ignore_index=True)
+
+            self.export(df, filename=arguments['-f'])
+
+
 
 
