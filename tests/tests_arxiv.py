@@ -57,8 +57,7 @@ class TestArxiv(unittest.TestCase):
         df = self.api.to_dataframe(entry)
 
         self.assertEqual(df['title'][0], entry['{http://}title'])
-        self.assertEqual(list(df['author'].unique()), entry['{'
-                                                          'http://}name'].split(','))
+        self.assertEqual(list(df['author']), entry['{http://}name'].split(','))
         self.assertEqual(df['abstract'][0], entry['{http://}summary'])
         self.assertEqual(df['date'][0], int(entry['{http://}published'].split('-')[0]))
         self.assertEqual(df['journal'][0], entry['{http://}journal_ref'])
