@@ -59,6 +59,7 @@ class Springer(Api):
         for key, value in raw_article:
             if key not in d:
                 if value is not None:
+                    value = value.replace(',', ' ')
                     d[key] = value
             else:
                 if value is not None:
