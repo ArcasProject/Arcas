@@ -11,7 +11,7 @@ result.json
 *arcas.egg-info*
 build/
 dist/
-docs/
+docs/_build
 .hypothesis/
 results.json
 Notes.ipynb
