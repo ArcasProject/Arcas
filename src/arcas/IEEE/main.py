@@ -58,19 +58,20 @@ class Ieee(Api):
         return raw_articles
 
     @staticmethod
-    def parameters_fix(arguments):
+    def parameters_fix(author=None, title=None, abstract=None, year=None,
+                       records=None, start=None):
         parameters = []
-        if arguments['-a'] is not None:
-            parameters.append('au={}'.format(arguments['-a']))
-        if arguments['-t'] is not None:
-            parameters.append('ti={}'.format(arguments['-t']))
-        if arguments['-b'] is not None:
-            parameters.append('ab={}'.format(arguments['-b']))
-        if arguments['-y'] is not None:
-            parameters.append('py={}'.format(arguments['-y']))
-        if arguments['-r'] is not None:
-            parameters.append('hc={}'.format(arguments['-r']))
-        if arguments['-s'] is not None:
-            parameters.append('rs={}'.format(arguments['-s']))
+        if author is not None:
+            parameters.append('au={}'.format(author))
+        if title is not None:
+            parameters.append('ti={}'.format(title))
+        if abstract is not None:
+            parameters.append('ab={}'.format(abstract))
+        if year is not None:
+            parameters.append('py={}'.format(year))
+        if records is not None:
+            parameters.append('hc={}'.format(records))
+        if start is not None:
+            parameters.append('rs={}'.format(start))
 
         return parameters

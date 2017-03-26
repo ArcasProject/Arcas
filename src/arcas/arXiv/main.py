@@ -55,18 +55,19 @@ class Arxiv(Api):
         return raw_articles
 
     @staticmethod
-    def parameters_fix(arguments):
+    def parameters_fix(author=None, title=None, abstract=None, year=None,
+                       records=None, start=None):
         parameters = []
-        if arguments['-a'] is not None:
-            parameters.append('au:{}'.format(arguments['-a']))
-        if arguments['-t'] is not None:
-            parameters.append('ti:{}'.format(arguments['-t']))
-        if arguments['-b'] is not None:
-            parameters.append('abs:{}'.format(arguments['-b']))
-        if arguments['-r'] is not None:
-            parameters.append('max_results={}'.format(arguments['-r']))
-        if arguments['-s'] is not None:
-            parameters.append('start={}'.format(arguments['-s']))
+        if author is not None:
+            parameters.append('au:{}'.format(author))
+        if title is not None:
+            parameters.append('ti:{}'.format(title))
+        if abstract is not None:
+            parameters.append('abs:{}'.format(abstract))
+        if records is not None:
+            parameters.append('max_results={}'.format(records))
+        if start is not None:
+            parameters.append('start={}'.format(start))
 
         return parameters
 

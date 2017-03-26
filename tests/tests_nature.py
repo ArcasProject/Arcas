@@ -68,7 +68,11 @@ class TestNature(unittest.TestCase):
 
     @given(dummy_arguments)
     def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(arguments)
+        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
+                                             abstract=arguments['-b'],
+                                             year=arguments['-y'],
+                                             records=arguments['-r'],
+                                             start=arguments['-s'])
         self.assertEqual('dc.creator={}'.format(arguments['-a']), parameters[0])
         self.assertEqual('dc.title adj {}'.format(arguments['-t']),
                          parameters[1])

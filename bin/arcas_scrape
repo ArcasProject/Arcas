@@ -38,7 +38,9 @@ if __name__ == '__main__':
     validate = ast.literal_eval(arguments['-v'])
 
     # generate the parameters
-    parameters = api.parameters_fix(arguments)
+    parameters = api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
+                                    abstract=arguments['-b'], year=arguments['-y'],
+                                    records=arguments['-r'], start=arguments['-s'])
     # generate url
     url = api.create_url_search(parameters)
     print(url)

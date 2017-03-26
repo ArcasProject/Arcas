@@ -71,7 +71,11 @@ class TestIEEE(unittest.TestCase):
 
     @given(dummy_arguments)
     def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(arguments)
+        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
+                                             abstract=arguments['-b'],
+                                             year=arguments['-y'],
+                                             records=arguments['-r'],
+                                             start=arguments['-s'])
         self.assertEqual('au={}'.format(arguments['-a']), parameters[0])
         self.assertEqual('ti={}'.format(arguments['-t']), parameters[1])
         self.assertEqual('ab={}'.format(arguments['-b']), parameters[2])

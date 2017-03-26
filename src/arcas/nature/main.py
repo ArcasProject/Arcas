@@ -86,19 +86,20 @@ class Nature(Api):
         return self.dict_to_dataframe(raw_article)
 
     @staticmethod
-    def parameters_fix(arguments):
+    def parameters_fix(author=None, title=None, abstract=None, year=None,
+                       records=None, start=None):
         parameters = []
-        if arguments['-a'] is not None:
-            parameters.append('dc.creator={}'.format(arguments['-a']))
-        if arguments['-t'] is not None:
-            parameters.append('dc.title adj {}'.format(arguments['-t']))
-        if arguments['-b'] is not None:
-            parameters.append('dc.description adj {}'.format(arguments['-b']))
-        if arguments['-y'] is not None:
-            parameters.append('prism.publicationDate={}'.format(arguments['-y']))
-        if arguments['-r'] is not None:
-            parameters.append('maximumRecords={}'.format(arguments['-r']))
-        if arguments['-s'] is not None:
-            parameters.append('startRecord={}'.format(arguments['-s']))
+        if author is not None:
+            parameters.append('dc.creator={}'.format(author))
+        if title is not None:
+            parameters.append('dc.title adj {}'.format(title))
+        if abstract is not None:
+            parameters.append('dc.description adj {}'.format(abstract))
+        if year is not None:
+            parameters.append('prism.publicationDate={}'.format(year))
+        if records is not None:
+            parameters.append('maximumRecords={}'.format(records))
+        if start is not None:
+            parameters.append('startRecord={}'.format(start))
 
         return parameters
