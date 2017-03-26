@@ -3,20 +3,12 @@ Status](https://travis-ci.org/Nikoleta-v3/Arcas.svg?branch=master)](https://trav
 
 # Arcas
 
-Arcas is python tool designed to help scraping APIs for academic articles.
-Currently it supports the following APIs:
-    - IEEE
-    - springer
-    - arXiv
-    - nature
-
-A more analytic list with various APIS can be found here: http://guides.lib
-.berkeley.edu/information-studies/apis.
-
+Arcas is python tool designed to help with collecting academic articles
+from various APIs.
 
 ## Installation
 
-The easiest way to install is from pypi:
+The easiest way to install is:
 
 ```bash
 $ pip install arcas
