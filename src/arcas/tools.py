@@ -65,7 +65,8 @@ class Api():
         pass
 
     @staticmethod
-    def parameters_fix(arguments):
+    def parameters_fix(author=None, title=None, abstract=None, year=None,
+                       records=None, start=None):
         pass
 
     @staticmethod

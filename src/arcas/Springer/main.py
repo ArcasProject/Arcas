@@ -86,18 +86,19 @@ class Springer(Api):
         return [self.xml_to_dict(raw_article) for raw_article in raw_articles]
 
     @staticmethod
-    def parameters_fix(arguments):
+    def parameters_fix(author=None, title=None, abstract=None, year=None,
+                       records=None, start=None):
         parameters = []
-        if arguments['-a'] is not None:
-            parameters.append('name:{}'.format(arguments['-a']))
-        if arguments['-t'] is not None:
-            parameters.append('title:{}'.format(arguments['-t']))
-        if arguments['-y'] is not None:
-            parameters.append('year:{}'.format(arguments['-y']))
-        if arguments['-r'] is not None:
-            parameters.append('p={}'.format(arguments['-r']))
-        if arguments['-s'] is not None:
-            parameters.append('s={}'.format(arguments['-s']))
+        if author is not None:
+            parameters.append('name:{}'.format(author))
+        if title is not None:
+            parameters.append('title:{}'.format(title))
+        if year is not None:
+            parameters.append('year:{}'.format(year))
+        if records is not None:
+            parameters.append('p={}'.format(records))
+        if start is not None:
+            parameters.append('s={}'.format(start))
 
         return parameters
 

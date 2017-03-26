@@ -65,7 +65,11 @@ class TestSpinger(unittest.TestCase):
 
     @given(dummy_arguments)
     def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(arguments)
+        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
+                                             abstract=arguments['-b'],
+                                             year=arguments['-y'],
+                                             records=arguments['-r'],
+                                             start=arguments['-s'])
         self.assertEqual('name:{}'.format(arguments['-a']), parameters[0])
         self.assertEqual('title:{}'.format(arguments['-t']),
                          parameters[1])

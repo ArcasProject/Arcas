@@ -89,22 +89,23 @@ class Plos(Api):
         return [self.xml_to_dict(raw_article) for raw_article in raw_articles]
 
     @staticmethod
-    def parameters_fix(arguments):
+    def parameters_fix(author=None, title=None, abstract=None, year=None,
+                       records=None, start=None):
         parameters = []
-        if arguments['-a'] is not None:
-            parameters.append('author:{}'.format(arguments['-a']))
-        if arguments['-t'] is not None:
-            parameters.append('title:{}'.format(arguments['-t']))
-        if arguments['-b'] is not None:
-            parameters.append('abstract:{}'.format(arguments['-b']))
-        if arguments['-y'] is not None:
+        if author is not None:
+            parameters.append('author:{}'.format(author))
+        if title is not None:
+            parameters.append('title:{}'.format(title))
+        if abstract is not None:
+            parameters.append('abstract:{}'.format(abstract))
+        if year is not None:
             parameters.append('publication_date:[{0}-01-01T00:00:00Z TO '
                               '{0}-12-30T23:59:59Z]'
-                              .format(arguments['-y']))
-        if arguments['-r'] is not None:
-            parameters.append('rows={}'.format(arguments['-r']))
-        if arguments['-s'] is not None:
-            parameters.append('start={}'.format(arguments['-s']))
+                              .format(year))
+        if records is not None:
+            parameters.append('rows={}'.format(records))
+        if start is not None:
+            parameters.append('start={}'.format(start))
 
         return parameters
 
