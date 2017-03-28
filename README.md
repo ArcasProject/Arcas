@@ -3,12 +3,12 @@ Status](https://travis-ci.org/Nikoleta-v3/Arcas.svg?branch=master)](https://trav
 
 # Arcas
 
-Arcas is python tool designed to help with collecting academic articles
+Arcas is a python tool designed to help with collecting academic articles
 from various APIs.
 
 ## Installation
 
-The easiest way to install is:
+The easiest way to install it is:
 
 ```bash
 $ pip install arcas
@@ -16,15 +16,16 @@ $ pip install arcas
 
 ## Usage
 
-Arcas used docopt to pass a list of arguments.
+Arcas uses `docopt` to pass a list of arguments.
 
 For example:
 
 ```
 $ arcas_scrape -p arxiv -t "Prisoner's Dilemma" -y 2000 -r 1
 ```
-This query pings the arXiv api and ask for 1 record with title containing the 
-words Prisoner's Dilemma and published year 2000. 
+
+This query pings the arXiv api and asks for 1 record with the title containing
+the words Prisoner's Dilemma and published year 2000.
 
 
 ## Development
