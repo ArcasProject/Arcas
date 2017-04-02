@@ -1,9 +1,9 @@
+#!/usr/bin/env python
 """Arcas. A library to facilitate scraping of APIs for scholarly resources.
 
 Usage:
-    arcas_scrape  [-h] [-p API] [-a AUTHOR] [-t TITLE] [-b ABSTRACT] [-y
-    YEAR]
-              [-r RECORDS] [-s START] [-v VALIDATE] [-f FILENAME]
+    arcas_scrape  [-h] [-p API] [-a AUTHOR] [-t TITLE] [-b ABSTRACT] [-y YEAR]
+                  [-r RECORDS] [-s START] [-v VALIDATE] [-f FILENAME]
     arcas_scrape --version
 
 
