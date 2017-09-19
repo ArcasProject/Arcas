@@ -1,14 +1,17 @@
 from setuptools import setup, find_packages
+
 import unittest
 import doctest
 
 # Read in the version number
 exec(open('src/arcas/version.py', 'r').read())
 
-requirements = ["requests==2.12.1",
-                "requests_mock==1.1.0",
-                "ratelimit==1.1.0",
-                "docopt"]
+requirements = ["requests>=2.12.5",
+                "requests_mock>=1.2.0",
+                "ratelimit==1.4.1",
+                "docopt",
+		"hypothesis",
+		"pytz"]
 
 def test_suite():
     """Discover all tests in the tests dir"""

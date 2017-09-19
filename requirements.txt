@@ -1,6 +1,6 @@
-requests==2.12.1
-requests_mock==1.1.0
-ratelimit==1.1.0
+requests
+requests_mock
+ratelimit
 docopt
 hypothesis
 pytz
