@@ -46,10 +46,11 @@ class Api():
         """Xml response with information on article to dictionary"""
         d = {}
         for at in record.iter():
-            if at.tag in d and at.text is not None:
-                d[at.tag] += ',{}'.format(at.text)
+            key = at.tag.split('}')[-1]
+            if key in d and at.text is not None:
+                d[key] += ', {}'.format(at.text)
             else:
-                d.update({at.tag: at.text})
+                d.update({key: at.text})
         return d
 
     @staticmethod
