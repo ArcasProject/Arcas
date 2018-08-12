@@ -13,6 +13,7 @@ Table of Contents
 
    installation.rst
    Tutorial/index.rst
+   Guides/index.rst
    Reference/index.rst
 
 

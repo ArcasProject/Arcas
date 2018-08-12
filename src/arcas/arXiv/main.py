@@ -3,9 +3,6 @@ from xml.etree import ElementTree
 
 
 class Arxiv(Api):
-    """
-     API argument is 'ieee'.
-    """
     def __init__(self):
         self.standard = 'http://export.arxiv.org/api/query?search_query='
 
@@ -14,7 +11,7 @@ class Arxiv(Api):
         """
         Fields we are keeping from arXiv results.
         """
-        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
+        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
                 'date', 'journal', 'provenance', 'primary_category', 'category']
         return keys
 
@@ -37,8 +34,8 @@ class Arxiv(Api):
 
         raw_article['provenance'] = 'arXiv'
         raw_article['title'] = raw_article.get('title', None)
-        raw_article['key'], raw_article['unique_key'] = self.create_keys(
-            raw_article)
+        raw_article['doi'] = raw_article.get('doi', None)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
         return self.dict_to_dataframe(raw_article)
 
@@ -55,7 +52,7 @@ class Arxiv(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None):
+                       records=None, start=None, category=None, journal=None):
         parameters = []
         if author is not None:
             parameters.append('au:{}'.format(author))
@@ -63,10 +60,16 @@ class Arxiv(Api):
             parameters.append('ti:{}'.format(title))
         if abstract is not None:
             parameters.append('abs:{}'.format(abstract))
+        if category is not None:
+            parameters.append('cat:{}'.format(category))
+        if journal is not None:
+            parameters.append('jr:{}'.format(journal))
         if records is not None:
             parameters.append('max_results={}'.format(records))
         if start is not None:
             parameters.append('start={}'.format(start))
+        if year is not None:
+            print('Api do not support argument.') # TODO: Add url to documentation
 
         return parameters
 

@@ -1,77 +1,96 @@
-import unittest
-from hypothesis import given
-import hypothesis.strategies as st
-from hypothesis.extra.datetime import dates
-from arcas.arXiv.main import Arxiv
+import arcas
+import pandas
 
-arxiv_entry = st.fixed_dictionaries(
-                   {'{http://}affiliation': st.text(min_size=5, max_size=5),
-                    '{http://}author': st.text(min_size=5, max_size=5),
-                    '{http://}category': st.booleans(),
-                    '{http://}comment': st.text(min_size=5, max_size=5),
-                    '{http://}doi': st.text(min_size=5, max_size=5),
-                    '{http://}entry': st.text(min_size=5, max_size=5),
-                    '{http://}id': st.text(min_size=5, max_size=5),
-                    '{http://}journal_ref': st.text(min_size=5, max_size=5),
-                    '{http://}link': st.booleans(),
-                    '{http://}name': st.lists(elements=st.text(min_size=5,
-                                                               max_size=5),
-                                              min_size=5, max_size=5,
-                                              unique=True),
-                    '{http://}primary_category': st.text(min_size=5,
-                                                         max_size=5),
-                    '{http://}summary': st.text(min_size=5, max_size=5),
-                    '{http://}title': st.text(min_size=5, max_size=5),
-                    '{http://}updated': st.text(min_size=5, max_size=5),
-                    })
+def test_setup():
+    api = arcas.Arxiv()
+    assert api.standard == 'http://export.arxiv.org/api/query?search_query='
 
-dummy_arguments = st.fixed_dictionaries(
-                    {'-a': st.text(min_size=5, max_size=5),
-                     '-t': st.text(min_size=5, max_size=5),
-                     '-b': st.text(min_size=5, max_size=5),
-                     '-r': st.text(min_size=5, max_size=5),
-                     '-s': st.text(min_size=5, max_size=5)
-                     })
+def test_keys():
+    api = arcas.Arxiv()
+    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author',
+                          'abstract', 'doi', 'date', 'journal', 'provenance',
+                          'primary_category', 'category']
 
-arxiv_keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-              'date', 'journal', 'provenance']
+def test_parameters_and_url_author():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(author='Glynatsi')
+    assert parameters == ['au:Glynatsi']
 
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=au:Glynatsi'
 
-class TestArxiv(unittest.TestCase):
+def test_parameters_and_url_title():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(title='Game')
+    assert parameters == ['ti:Game']
 
-    def setUp(self):
-        self.api = Arxiv()
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=ti:Game'
 
-    def test_keys(self):
-        keys = self.api.keys()
-        self.assertEqual(keys, arxiv_keys)
+def test_parameters_and_url_abstract():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(abstract='Game')
+    assert parameters == ['abs:Game']
 
-    @given(arxiv_entry)
-    def test_to_json(self, entry):
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=abs:Game'
 
-        a_date = dates(min_year=1000, max_year=2017).example()
-        a_date = [str(a_date.year), str(a_date.month), str(a_date.day)]
-        entry['{http://}published'] = '-'.join(a_date)
-        entry['{http://}name'] = ','.join(entry['{http://}name'])
+def test_parameters_and_url_category():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(category='game theory')
+    assert parameters == ['cat:game theory']
 
-        df = self.api.to_dataframe(entry)
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=cat:game theory'
 
-        self.assertEqual(df['title'][0], entry['{http://}title'])
-        self.assertEqual(list(df['author']), entry['{http://}name'].split(','))
-        self.assertEqual(df['abstract'][0], entry['{http://}summary'])
-        self.assertEqual(df['date'][0], int(entry['{http://}published'].split('-')[0]))
-        self.assertEqual(df['journal'][0], entry['{http://}journal_ref'])
-        self.assertEqual(df['provenance'][0], 'arXiv')
+def test_parameters_and_url_journal():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(journal='arxiv')
+    assert parameters == ['jr:arxiv']
 
-    @given(dummy_arguments)
-    def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
-                                             abstract=arguments['-b'],
-                                             records=arguments['-r'],
-                                             start=arguments['-s'])
-        self.assertEqual('au:{}'.format(arguments['-a']), parameters[0])
-        self.assertEqual('ti:{}'.format(arguments['-t']), parameters[1])
-        self.assertEqual('abs:{}'.format(arguments['-b']), parameters[2])
-        self.assertEqual('max_results={}'.format(arguments['-r']),
-                         parameters[3])
-        self.assertEqual(('start={}'.format(arguments['-s'])), parameters[4])
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=jr:arxiv'
+
+def test_parameters_and_url_record():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(records=1)
+    assert parameters == ['max_results=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=max_results=1'
+
+def test_parameters_and_url_start():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(start=1)
+    assert parameters == ['start=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=start=1'
+
+def test_create_url_search():
+    api = arcas.Arxiv()
+    parameters = api.parameters_fix(title='Nash', abstract='mixed', records=2, start=5)
+    url = api.create_url_search(parameters)
+    assert url == 'http://export.arxiv.org/api/query?search_query=ti:Nash&abs:mixed&max_results=2&start=5'
+
+def test_to_dataframe():
+    dummy_article = {'entry': '\n', 'id': 'http://arxiv.org/abs/0000',
+                     'updated': '2011', 'published': '2010', 'title': 'Title',
+                     'summary': "Abstract", 'author': '\n', 'name': 'E Glynatsi, V Knight',
+                     'doi': '10.0000', 'comment': 'This is a comment.',
+                     'journal_ref': 'Awesome Journal', 'primary_category': 'Dummy',
+                     'category': None}
+    api = arcas.Arxiv()
+    article = api.to_dataframe(dummy_article)
+
+    assert isinstance(article, pandas.core.frame.DataFrame)
+    assert list(article.columns) == api.keys()
+    assert len(article['url']) == 2
+
+    assert article['url'].unique()[0] == 'http://arxiv.org/abs/0000'
+    assert article['key'].unique()[0] == 'Glynatsi2010'
+    assert article['title'].unique()[0] == 'Title'
+    assert article['abstract'].unique()[0] == 'Abstract'
+    assert article['journal'].unique()[0] == 'Awesome Journal'
+    assert article['primary_category'].unique()[0] == 'Dummy'
+    assert article['category'].unique()[0] == None
