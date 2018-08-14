@@ -1,74 +1,98 @@
-import unittest
-from hypothesis import given
-import hypothesis.strategies as st
-from hypothesis.extra.datetime import dates
-from arcas.PLOS.main import Plos
+import arcas
+import pandas
 
-plos_entry = st.fixed_dictionaries(
-                   {'id': st.text(min_size=5, max_size=5),
-                    'journal': st.text(min_size=5, max_size=5),
-                    'article_type': st.text(min_size=5, max_size=5),
-                    'author_display': st.lists(elements=st.text(min_size=5,
-                                                                max_size=5),
-                                               min_size=5, max_size=5,
-                                               unique=True),
-                    'abstract': st.text(min_size=5, max_size=5),
-                    'title_display': st.text(min_size=5, max_size=5),
-                    'score': st.text(min_size=5, max_size=5)
-                    })
+def test_setup():
+    api = arcas.Plos()
+    assert api.standard == 'http://api.plos.org/search?q='
 
-dummy_arguments = st.fixed_dictionaries(
-                    {'-a': st.text(min_size=5, max_size=5),
-                     '-t': st.text(min_size=5, max_size=5),
-                     '-b': st.text(min_size=5, max_size=5),
-                     '-y': st.text(min_size=5, max_size=5),
-                     '-r': st.text(min_size=5, max_size=5),
-                     '-s': st.text(min_size=5, max_size=5)
-                     })
+def test_keys():
+    api = arcas.Plos()
+    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
+                          'doi', 'date', 'journal', 'provenance', 'score']
 
-plos_keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-             'date', 'journal', 'provenance', 'score']
+def test_parameters_and_url_author():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(author='Glynatsi')
+    assert parameters == ['author:"Glynatsi"']
 
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=author:"Glynatsi"'
 
-class TestArxiv(unittest.TestCase):
+def test_parameters_and_url_title():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(title='Game')
+    assert parameters == ['title:"Game"']
 
-    def setUp(self):
-        self.api = Plos()
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=title:"Game"'
 
-    def test_keys(self):
-        keys = self.api.keys()
-        self.assertEqual(keys, plos_keys)
+def test_parameters_and_url_abstract():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(abstract='Game')
+    assert parameters == ['abstract:"Game"']
 
-    @given(plos_entry)
-    def test_to_dataframe(self, entry):
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=abstract:"Game"'
 
-        a_date = dates(min_year=1000, max_year=2017).example()
-        a_date = [str(a_date.year), str(a_date.month), str(a_date.day)]
-        entry['publication_date'] = '-'.join(a_date)
+def test_parameters_and_url_category():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(category='game theory')
+    assert parameters == ['subject:"game theory"']
 
-        df = self.api.to_dataframe(entry)
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=subject:"game theory"'
 
-        self.assertEqual(df['title'][0], entry['title_display'])
-        self.assertEqual(list(df['author'].unique()), entry['author_display'])
-        self.assertEqual(df['abstract'][0], entry['abstract'])
-        self.assertEqual(df['date'][0], int(entry['publication_date'].split(
-            '-')[0]))
-        self.assertEqual(df['journal'][0], entry['journal'])
-        self.assertEqual(df['provenance'][0], 'PLOS')
+def test_parameters_and_url_journal():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(journal='PLOS ONE')
+    assert parameters == ['journal:"PLOS ONE"']
 
-    @given(dummy_arguments)
-    def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
-                                             abstract=arguments['-b'],
-                                             year=arguments['-y'],
-                                             records=arguments['-r'],
-                                             start=arguments['-s'])
-        self.assertEqual('author:{}'.format(arguments['-a']), parameters[0])
-        self.assertEqual('title:{}'.format(arguments['-t']), parameters[1])
-        self.assertEqual('abstract:{}'.format(arguments['-b']), parameters[2])
-        self.assertEqual('publication_date:[{0}-01-01T00:00:00Z TO '
-                         '{0}-12-30T23:59:59Z]'.format(arguments['-y']),
-                         parameters[3])
-        self.assertEqual('rows={}'.format(arguments['-r']),
-                         parameters[4])
-        self.assertEqual(('start={}'.format(arguments['-s'])), parameters[5])
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=journal:"PLOS ONE"'
+
+def test_parameters_and_url_record():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(records=1)
+    assert parameters == ['rows=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=rows=1'
+
+def test_parameters_and_url_start():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(start=1)
+    assert parameters == ['start=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=start=1'
+
+def test_create_url_search():
+    api = arcas.Plos()
+    parameters = api.parameters_fix(title='Nash', abstract='mixed', records=2, start=5)
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.plos.org/search?q=title:"Nash"+AND+abstract:"mixed"&rows=2&start=5'
+
+def test_to_dataframe():
+    dummy_article = {'response': [],
+                    'id': '10.0000/journal.pone.00000',
+                    'journal': 'PLOS ONE',
+                    'publication_date': '2010-12-12T00:00:00Z',
+                    'article_type': 'Research Article',
+                    'author_display': ['E Glynatsi', 'V Knight'],
+                    'abstract': "Abstract",
+                    'title_display': "Title",
+                    'score': '10'}
+    api = arcas.Plos()
+    article = api.to_dataframe(dummy_article)
+
+    assert isinstance(article, pandas.core.frame.DataFrame)
+    assert list(article.columns) == api.keys()
+    assert len(article['url']) == 2
+
+    assert article['url'].unique()[0] == 'https://doi.org/' + dummy_article['id']
+    assert article['key'].unique()[0] == 'Glynatsi2010'
+    assert article['title'].unique()[0] == 'Title'
+    assert article['abstract'].unique()[0] == 'Abstract'
+    assert article['journal'].unique()[0] == 'PLOS ONE'
+    assert article['date'].unique()[0] == 2010
+    assert article['doi'].unique()[0] == dummy_article['id']
