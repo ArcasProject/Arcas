@@ -8,3 +8,4 @@ Contents:
 
    arxiv.rst
    plos.rst
+   nature.rst

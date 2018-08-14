@@ -3,19 +3,16 @@ from xml.etree import ElementTree
 
 
 class Nature(Api):
-    """
-    API argument is 'nature'.
-    """
     def __init__(self):
-        self.standard = 'http://www.nature.com/opensearch/request?queryType=cql&query='
+        self.standard = 'http://www.nature.com/opensearch/request?&query='
 
     @staticmethod
     def keys():
         """
         Fields we are keeping from Springer results.
         """
-        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-                'date', 'journal', 'key_word', 'provenance']
+        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
+                'date', 'journal', 'provenance', 'category']
         return keys
 
     def create_url_search(self, parameters):
@@ -68,27 +65,30 @@ class Nature(Api):
         """A function which takes a dictionary with structure of the nature
         results and transform it to a standardized format.
         """
-        raw_article['author'] = raw_article.get('creator', None)
-        if raw_article['author'] is not None:
-            raw_article['author'] = raw_article['author'].split(',')
+        raw_article['url'] = raw_article.get('url', None)
+        for key_one, key_two in [['author', 'creator'], ['category', 'subject']]:
+            raw_article[key_one] = raw_article.get(key_two, None)
+            if raw_article[key_one] is not None:
+                raw_article[key_one] = raw_article[key_one].split(',')
 
         raw_article['abstract'] = raw_article.get('description', None)
         raw_article['date'] = int(raw_article.get('publicationDate', '0').split('-')[0])
-        raw_article['journal'] = raw_article.get('publisher', None)
+        raw_article['journal'] = raw_article.get('publicationName', None)
 
-        raw_article['key_word'] = raw_article.get('subject', None)
-        if raw_article['key_word'] is not None:
-            raw_article['key_word'] = raw_article['key_word'].split(',')
+        raw_article['category'] = raw_article.get('subject', None)
+        if raw_article['category'] is not None:
+            raw_article['category'] = raw_article['category'].split(',')
 
         raw_article['provenance'] = 'Nature'
         raw_article['title'] = raw_article.get('title', None)
+        raw_article['doi'] = raw_article.get('doi', None)
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
         return self.dict_to_dataframe(raw_article)
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None):
+                       records=None, start=None, category=None, journal=None):
         parameters = []
         if author is not None:
             parameters.append('dc.creator={}'.format(author))
@@ -98,6 +98,10 @@ class Nature(Api):
             parameters.append('dc.description adj {}'.format(abstract))
         if year is not None:
             parameters.append('prism.publicationDate={}'.format(year))
+        if journal is not None:
+            parameters.append('prism.publicationName={}'.format(journal))
+        if category is not None:
+            parameters.append('dc.subject adj {}'.format(category))
         if records is not None:
             parameters.append('maximumRecords={}'.format(records))
         if start is not None:

@@ -1,90 +1,108 @@
-import unittest
-from hypothesis import given
-import hypothesis.strategies as st
-from hypothesis.extra.datetime import dates
-from arcas.nature.main import Nature
-import string
+import arcas
+import pandas
 
-nature_entry = st.fixed_dictionaries({
-                     'message': st.text(min_size=5, max_size=5),
-                     'article': st.text(min_size=5, max_size=5),
-                     'head': st.text(min_size=5, max_size=5),
-                     'identifier': st.text(min_size=5, max_size=5),
-                     'title': st.text(min_size=5, max_size=5),
-                     'creator': st.lists(st.text(min_size=5,
-                                                 max_size=5, alphabet=string.ascii_lowercase),
-                                        min_size=5, max_size=5,
-                                         unique=True, ),
-                     'publicationName': st.text(min_size=5, max_size=10),
-                     'eIssn': st.text(min_size=5, max_size=5),
-                     'doi': st.text(min_size=5, max_size=5),
-                     'publisher': st.text(min_size=5, max_size=5),
-                     'subject': st.lists(st.text(min_size=5,
-                                                 max_size=5, alphabet=string.ascii_lowercase),
-                                         min_size=5, max_size=5, unique=True),
-                     'description': st.text(min_size=5, max_size=5)
-})
+def test_setup():
+    api = arcas.Nature()
+    assert api.standard == 'http://www.nature.com/opensearch/request?&query='
 
-dummy_arguments = st.fixed_dictionaries(
-                    {'-a': st.text(min_size=5, max_size=5),
-                     '-t': st.text(min_size=5, max_size=5),
-                     '-b': st.text(min_size=5, max_size=5),
-                     '-y': st.text(min_size=5, max_size=5),
-                     '-r': st.text(min_size=5, max_size=5),
-                     '-s': st.text(min_size=5, max_size=5)
-                     })
+def test_keys():
+    api = arcas.Nature()
+    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
+                'date', 'journal', 'provenance', 'category']
 
-nature_keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-               'date', 'journal', 'key_word', 'provenance']
+def test_parameters_and_url_author():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(author='Glynatsi')
+    assert parameters == ['dc.creator=Glynatsi']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=dc.creator=Glynatsi'
+
+def test_parameters_and_url_title():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(title='Game')
+    assert parameters == ['dc.title adj Game']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=dc.title adj Game'
+
+def test_parameters_and_url_abstract():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(abstract='Game')
+    assert parameters == ['dc.description adj Game']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=dc.description adj Game'
+
+def test_parameters_and_url_year():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(year=2010)
+    assert parameters == ['prism.publicationDate=2010']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=prism.publicationDate=2010'
+
+def test_parameters_and_url_category():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(category='game theory')
+    assert parameters == ['dc.subject adj game theory']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=dc.subject adj game theory'
+
+def test_parameters_and_url_journal():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(journal='Nature')
+    assert parameters == ['prism.publicationName=Nature']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=prism.publicationName=Nature'
+
+def test_parameters_and_url_record():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(records=1)
+    assert parameters == ['maximumRecords=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=maximumRecords=1'
+
+def test_parameters_and_url_start():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(start=1)
+    assert parameters == ['startRecord=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=startRecord=1'
+
+def test_create_url_search():
+    api = arcas.Nature()
+    parameters = api.parameters_fix(title='Nash', abstract='mixed', records=2, start=5)
+    url = api.create_url_search(parameters)
+    assert url == 'http://www.nature.com/opensearch/request?&query=dc.title adj Nash+AND+dc.description adj mixed&maximumRecords=2&startRecord=5'
+
+def test_to_dataframe():
+    dummy_article = {'records': None, 'record': None, 'recordSchema': 'info:srw/schema/11/pam-v2.1',
+                     'recordPacking': 'packed', 'recordData': None, 'message': None,
+                     'article': None, 'head': None, 'identifier': 'doi:10.1000',
+                     'title': 'Title', 'creator': 'E Glynatsi, V Knight',
+                     'publicationName': 'Journal', 'doi': '10.1000', 'publicationDate': '2010',
+                     'description': 'Abstract',
+                     'volume': '48', 'number': '4', 'startingPage': '423',
+                     'endingPage': '432', 'url': 'http://nature.org/abs/0000'}
 
 
-class TestNature(unittest.TestCase):
-    def setUp(self):
-        self.api = Nature()
 
-    def test_keys(self):
-        keys = self.api.keys()
-        self.assertEqual(keys, nature_keys)
+    api = arcas.Nature()
+    article = api.to_dataframe(dummy_article)
 
-    @given(nature_entry)
-    def test_to_json(self, entry):
+    assert isinstance(article, pandas.core.frame.DataFrame)
+    assert list(article.columns) == api.keys()
+    assert len(article['url']) == 2
 
-        a_date = dates(min_year=1000, max_year=2017).example()
-        a_date = [str(a_date.year), str(a_date.month), str(a_date.day)]
-        entry['publicationDate'] = '-'.join(a_date)
-        entry['creator'] = ','.join(entry['creator'])
-        entry['subject'] = ','.join(entry['subject'])
-
-        df = self.api.to_dataframe(entry)
-
-        self.assertEqual(df['title'][0], entry['title'])
-        self.assertEqual(list(df['author'].unique()),  entry['creator'].split(','))
-        self.assertEqual(df['abstract'][0], entry['description'])
-        self.assertEqual(df['date'][0], int(entry['publicationDate'].split('-')[0]))
-        self.assertEqual(list(df['key_word'].unique()), entry['subject'].split(
-                                                                            ','))
-        self.assertEqual(df['journal'][0], entry['publisher'])
-        self.assertEqual(df['provenance'][0], 'Nature')
-
-    @given(dummy_arguments)
-    def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
-                                             abstract=arguments['-b'],
-                                             year=arguments['-y'],
-                                             records=arguments['-r'],
-                                             start=arguments['-s'])
-        self.assertEqual('dc.creator={}'.format(arguments['-a']), parameters[0])
-        self.assertEqual('dc.title adj {}'.format(arguments['-t']),
-                         parameters[1])
-        self.assertEqual('dc.description adj {}'.format(arguments['-b']),
-                         parameters[2])
-        self.assertEqual('prism.publicationDate={}'.format(arguments['-y']),
-                         parameters[3])
-        self.assertEqual('maximumRecords={}'.format(arguments['-r']),
-                         parameters[4])
-        self.assertEqual(('startRecord={}'.format(arguments['-s'])),
-                         parameters[5])
-
-
-
-
+    assert article['url'].unique()[0] == 'http://nature.org/abs/0000'
+    assert article['key'].unique()[0] == 'Glynatsi2010'
+    assert article['title'].unique()[0] == 'Title'
+    assert article['abstract'].unique()[0] == 'Abstract'
+    assert article['journal'].unique()[0] == 'Journal'
+    assert article['doi'].unique()[0] == '10.1000'
+    assert article['category'].unique()[0] == None
