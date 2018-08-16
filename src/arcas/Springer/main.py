@@ -4,9 +4,6 @@ from xml.etree import ElementTree
 
 
 class Springer(Api):
-    """
-     API argument is 'springer'.
-    """
     def __init__(self):
         self.standard = 'http://api.springer.com/metadata/pam?q='
         self.key_api = api_key
@@ -16,7 +13,7 @@ class Springer(Api):
         """
         Fields we are keeping from Springer results.
         """
-        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
+        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
                 'date', 'journal', 'provenance']
         return keys
 
@@ -37,6 +34,7 @@ class Springer(Api):
         """A function which takes a dictionary with structure of the Springer
         results and transform it to a standardized format.
         """
+        raw_article['url'] = raw_article.get('url', None)
         raw_article['author'] = raw_article.get('creator', None)
         if raw_article['author'] is not None:
             raw_article['author'] = raw_article['author'].split(',')
@@ -47,6 +45,7 @@ class Springer(Api):
         raw_article['journal'] = raw_article.get('publicationName', None)
         raw_article['provenance'] = 'Springer'
         raw_article['title'] = raw_article.get('title', None)
+        raw_article['doi'] = raw_article.get('doi', None)        
         raw_article['key'], raw_article['unique_key'] = self.create_keys(
             raw_article)
 
@@ -69,12 +68,12 @@ class Springer(Api):
 
     def parse(self, root):
         """Parsing the xml file"""
-        parents = root.getchildren()[3]
-        if not parents:
+        branches = [branch for branch in root.getchildren() if branch.tag == 'records']
+        if not branches:
             return False
         else:
             raw_articles = [[]]
-            for at in parents.iter():
+            for at in branches[0].iter():
                 key = at.tag.split('}')[-1]
                 if key == 'article':
                     raw_articles.append([])
@@ -87,7 +86,7 @@ class Springer(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None):
+                       records=None, start=None, category=None, journal=None):
         parameters = []
         if author is not None:
             parameters.append('name:{}'.format(author))
@@ -95,10 +94,17 @@ class Springer(Api):
             parameters.append('title:{}'.format(title))
         if year is not None:
             parameters.append('year:{}'.format(year))
+        if category is not None:
+            parameters.append('subject:{}'.format(category))
+        if journal is not None:
+            parameters.append('pub:{}'.format(journal))
         if records is not None:
             parameters.append('p={}'.format(records))
         if start is not None:
             parameters.append('s={}'.format(start))
+        if abstract is not None:
+            print('Springer does not support argument abstract.')
+            print()
 
         return parameters
 

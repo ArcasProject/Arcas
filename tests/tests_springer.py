@@ -1,81 +1,87 @@
-import unittest
-from hypothesis import given
-import hypothesis.strategies as st
-from hypothesis.extra.datetime import dates
-from arcas.Springer.main import Springer
-import string
+import arcas
+import pandas
 
-springer_entry = st.fixed_dictionaries({
-                    'records': st.text(min_size=5, max_size=5),
-                    'message': st.text(min_size=5, max_size=5),
-                    'head': st.text(min_size=5,max_size=5),
-                    'article': st.text(min_size=5, max_size=5),
-                    'identifier': st.text(min_size=5, max_size=5),
-                    'title': st.text(min_size=5, max_size=5),
-                    'creator': st.lists(st.text(min_size=5, max_size=5, alphabet=string.ascii_lowercase),
-                                                 min_size=5, max_size=5,
-                                        unique=True),
-                    'publicationName': st.text(min_size=5,
-                                                        max_size=5),
-                    'printIsbn': st.text(min_size=5, max_size=5),
-                    'electronicIsbn': st.text(min_size=5, max_size=5),
-                    'publisher': st.text(min_size=5, max_size=5),
-                    'body': st.text(min_size=5, max_size=5),
-                    'h1': st.text(min_size=5, max_size=5),
-                    'p': st.text(min_size=5, max_size=5)})
+def test_setup():
+    api = arcas.Springer()
+    assert api.standard == 'http://api.springer.com/metadata/pam?q='
 
-dummy_arguments = st.fixed_dictionaries(
-                    {'-a': st.text(min_size=5, max_size=5),
-                     '-t': st.text(min_size=5, max_size=5),
-                     '-b': st.text(min_size=5, max_size=5),
-                     '-y': st.text(min_size=5, max_size=5),
-                     '-r': st.text(min_size=5, max_size=5),
-                     '-s': st.text(min_size=5, max_size=5)
-                     })
+def test_keys():
+    api = arcas.Springer()
+    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author',
+                          'abstract', 'doi', 'date', 'journal', 'provenance']
 
-springer_keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-                 'date', 'journal', 'provenance']
+def test_parameters_and_url_author():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(author='Glynatsi')
+    assert parameters == ['name:Glynatsi']
 
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=name:Glynatsi&api_key=Your key here'
 
-class TestSpinger(unittest.TestCase):
-    def setUp(self):
-        self.api = Springer()
+def test_parameters_and_url_title():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(title='Game')
+    assert parameters == ['title:Game']
 
-    def test_keys(self):
-        keys = self.api.keys()
-        self.assertEqual(keys, springer_keys)
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=title:Game&api_key=Your key here'
 
-    @given(springer_entry)
-    def test_to_json(self, entry):
+def test_parameters_and_url_category():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(category='game theory')
+    assert parameters == ['subject:game theory']
 
-        a_date = dates(min_year=1000, max_year=2017).example()
-        a_date = [str(a_date.year), str(a_date.month), str(a_date.day)]
-        entry['publicationDate'] = '-'.join(a_date)
-        entry['creator'] = ';'.join(entry['creator'])
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=subject:game theory&api_key=Your key here'
 
-        df = self.api.to_dataframe(entry)
+def test_parameters_and_url_journal():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(journal='Springer')
+    assert parameters == ['pub:Springer']
 
-        self.assertEqual(df['title'][0], entry['title'])
-        self.assertEqual(list(df['author'].unique()), entry['creator'].split(
-            ','))
-        self.assertEqual(df['abstract'][0], entry['p'])
-        self.assertEqual(df['date'][0], int(entry['publicationDate'].split('-')[0]))
-        self.assertEqual(df['journal'][0], entry['publicationName'])
-        self.assertEqual(df['provenance'][0], 'Springer')
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=pub:Springer&api_key=Your key here'
 
-    @given(dummy_arguments)
-    def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
-                                             abstract=arguments['-b'],
-                                             year=arguments['-y'],
-                                             records=arguments['-r'],
-                                             start=arguments['-s'])
-        self.assertEqual('name:{}'.format(arguments['-a']), parameters[0])
-        self.assertEqual('title:{}'.format(arguments['-t']),
-                         parameters[1])
-        self.assertEqual('year:{}'.format(arguments['-y']),
-                         parameters[2])
-        self.assertEqual('p={}'.format(arguments['-r']),
-                         parameters[3])
-        self.assertEqual(('s={}'.format(arguments['-s'])),
-                         parameters[4])
+def test_parameters_and_url_record():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(records=1)
+    assert parameters == ['p=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=p=1&api_key=Your key here'
+
+def test_parameters_and_url_start():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(start=1)
+    assert parameters == ['s=1']
+
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=s=1&api_key=Your key here'
+
+def test_create_url_search():
+    api = arcas.Springer()
+    parameters = api.parameters_fix(title='Nash', journal='Spinger', records=2, start=5)
+    url = api.create_url_search(parameters)
+    assert url == 'http://api.springer.com/metadata/pam?q=title:Nash+AND+pub:Spinger&p=2&s=5&api_key=Your key here'
+
+def test_to_dataframe():
+    dummy_article = {'identifier': 'doi:10.1000/', 'title': 'Title',
+                     'creator': 'E Glynatsi, V Knight', 'publicationName': 
+                     'Awesome Journal', 'genre': 'ReviewPaper', 'openAccess': 'false',
+                     'h1': 'Abstract', 'p': 'Abstract',
+                     'doi': '10.1000/', 'publisher': 'Springer',
+                     'publicationDate': '2021-01-01', 'url': 'http://dx.doi.org/10.1000/'}
+
+    api = arcas.Springer()
+    article = api.to_dataframe(dummy_article)
+
+    assert isinstance(article, pandas.core.frame.DataFrame)
+    assert list(article.columns) == api.keys()
+    assert len(article['url']) == 2
+
+    assert article['url'].unique()[0] == 'http://dx.doi.org/10.1000/'
+    assert article['key'].unique()[0] == 'Glynatsi2021'
+    assert article['title'].unique()[0] == 'Title'
+    assert article['abstract'].unique()[0] == 'Abstract'
+    assert article['journal'].unique()[0] == 'Awesome Journal'
+    assert article['date'].unique()[0] == 2021

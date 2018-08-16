@@ -69,7 +69,7 @@ class Arxiv(Api):
         if start is not None:
             parameters.append('start={}'.format(start))
         if year is not None:
-            print('Api do not support argument.') # TODO: Add url to documentation
+            print('ArXiv does not support argument year.') # TODO: Add url to documentation
 
         return parameters
 
