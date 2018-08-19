@@ -1,10 +1,11 @@
-from xml.etree import ElementTree
-
-import requests
 import hashlib
 import itertools
+from xml.etree import ElementTree
+
 import pandas as pd
-from ratelimit import *
+import requests
+
+import ratelimit
 
 
 class APIError(Exception):
@@ -33,7 +34,7 @@ class Api():
         return url
 
     @staticmethod
-    @rate_limited(3)
+    @ratelimit.rate_limited(3)
     def make_request(url):
         """Request from an API and returns response."""
         response = requests.get(url, stream=True)
@@ -176,7 +177,3 @@ class Api():
             df = pd.concat(dfs, ignore_index=True)
 
             self.export(df, filename=arguments['-f'])
-
-
-
-

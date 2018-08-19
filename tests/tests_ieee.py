@@ -1,85 +1,110 @@
-import unittest
-from hypothesis import given
-import hypothesis.strategies as st
-from hypothesis.extra.datetime import dates
-from arcas.IEEE.main import Ieee
+import arcas
+import pandas
 
-ieee_entry = st.fixed_dictionaries(
-                  {'title': st.text(min_size=5, max_size=5),
-                   'authors': st.lists(elements=st.text(min_size=5,
-                                                        max_size=5),
-                                       min_size=5, max_size=5, unique=True),
-                   'affiliations': st.text(min_size=5, max_size=5),
-                   'term': st.lists(elements=st.text(min_size=5,max_size=5),
-                                    min_size=5, max_size=5),
-                   'pubtitle': st.text(min_size=5, max_size=5),
-                   'punumber': st.text(min_size=5, max_size=5),
-                   'spage': st.text(max_size=3),
-                   'epage': st.text(max_size=3),
-                   'publisher': st.text(min_size=5, max_size=5),
-                   'py': dates(min_year=1000, max_year=2010),
-                   'abstract': st.text(min_size=5, max_size=5),
-                   'issn': st.text(min_size=5, max_size=5),
-                   'doi': st.text(min_size=5, max_size=5),
-                   'publicationId': st.text(min_size=5, max_size=5),
-                   'partnum': st.text(min_size=5, max_size=5),
-                   'mdurl': st.text(min_size=5, max_size=5),
-                   'pdf': st.text(min_size=5, max_size=5)})
+def test_setup():
+    api = arcas.Ieee()
+    assert api.standard == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?'
 
-dummy_arguments = st.fixed_dictionaries(
-                    {'-a': st.text(min_size=5, max_size=5),
-                     '-t': st.text(min_size=5, max_size=5),
-                     '-b': st.text(min_size=5, max_size=5),
-                     '-y': st.text(min_size=5, max_size=5),
-                     '-r': st.text(min_size=5, max_size=5),
-                     '-s': st.text(min_size=5, max_size=5)
-                     })
+def test_keys():
+    api = arcas.Ieee()
+    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
+                          'doi', 'date', 'journal', 'provenance', 'category']
 
-ieee_keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-             'date', 'journal', 'pages', 'key_word', 'provenance']
+def test_parameters_and_url_author():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(author='Glynatsi')
+    assert parameters == ['author=Glynatsi']
+
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?author=Glynatsi&apikey=Your key here'
+
+def test_parameters_and_url_title():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(title='Game')
+    assert parameters == ['article_title=Game']
+
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?article_title=Game&apikey=Your key here'
+
+def test_parameters_and_url_abstract():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(abstract='Game')
+    assert parameters == ['abstract=Game']
+
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?abstract=Game&apikey=Your key here'
+
+def test_parameters_and_url_year():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(year=2010)
+    assert parameters == ['publication_year=2010']
+
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?publication_year=2010&apikey=Your key here'
 
 
-class TestIEEE(unittest.TestCase):
-    def setUp(self):
-        self.api = Ieee()
+def test_parameters_and_url_category():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(category='game theory')
+    assert parameters == ['index_terms=game theory']
 
-    def test_keys(self):
-        keys = self.api.keys()
-        self.assertEqual(keys, ieee_keys)
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?index_terms=game theory&apikey=Your key here'
 
-    @given(ieee_entry)
-    def test_to_dataframe(self, entry):
+def test_parameters_and_url_journal():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(journal='Ieee')
+    assert parameters == ['publication_title=Ieee']
 
-        entry['py'] = str(entry['py'].year)
-        entry['authors'] = '; '.join(entry['authors'])
-        entry['term'] = '_ '.join(entry['term'])
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?publication_title=Ieee&apikey=Your key here'
 
-        df = self.api.to_dataframe(entry)
+def test_parameters_and_url_record():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(records=1)
+    assert parameters == ['max_records=1']
 
-        self.assertEqual(df['title'][0], entry['title'])
-        self.assertEqual(list(df['author'].unique()),  entry[
-            'authors'].split('; '))
-        self.assertEqual(df['abstract'][0], entry['abstract'])
-        self.assertEqual(df['date'][0], int(entry['py'].split('-')[0]))
-        self.assertEqual(df['journal'][0], entry['pubtitle'])
-        self.assertEqual(df['pages'][0], '{}-{}'.format(entry['spage'],
-                                                        entry['epage']))
-        self.assertEqual(df['provenance'][0], 'IEEE')
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?max_records=1&apikey=Your key here'
 
-        self.assertEqual(list(df['key_word'].unique()), entry['term'].split(
-            ','))
+def test_parameters_and_url_start():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(start=1)
+    assert parameters == ['start_record=1']
 
-    @given(dummy_arguments)
-    def test_parameters(self, arguments):
-        parameters = self.api.parameters_fix(author=arguments['-a'], title=arguments['-t'],
-                                             abstract=arguments['-b'],
-                                             year=arguments['-y'],
-                                             records=arguments['-r'],
-                                             start=arguments['-s'])
-        self.assertEqual('au={}'.format(arguments['-a']), parameters[0])
-        self.assertEqual('ti={}'.format(arguments['-t']), parameters[1])
-        self.assertEqual('ab={}'.format(arguments['-b']), parameters[2])
-        self.assertEqual('py={}'.format(arguments['-y']), parameters[3])
-        self.assertEqual('hc={}'.format(arguments['-r']),
-                         parameters[4])
-        self.assertEqual(('rs={}'.format(arguments['-s'])), parameters[5])
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?start_record=1&apikey=Your key here'
+
+def test_create_url_search():
+    api = arcas.Ieee()
+    parameters = api.parameters_fix(title='Nash', journal='Spinger', records=2, start=5)
+    url = api.create_url_search(parameters)
+    assert url == 'https://ieeexploreapi.ieee.org/api/v1/search/articles?article_title=Nash&publication_title=Spinger&max_records=2&start_record=5&apikey=Your key here'
+
+def test_to_dataframe():
+    dummy_article = {'rank': 1, 'access_type': 'LOCKED', 'content_type': 'Journals',
+                     'article_number': '000000', 'doi': '10.1000/',
+                     'title': 'Title', 'publication_number': 0, 'publication_title': 'IEEE/Journal',
+                     'volume': '22', 'issn': '1063-6692', 'publisher': 'IEEE',
+                     'citing_paper_count': 4, 'publication_date': 'May. 2010',
+                     'index_terms': {'author_terms': {'terms': ['something else',
+                     'something']}}, 'pdf_url': 'https://ieeexplore.ieee.org/stamp/0000',
+                     'abstract_url': 'https://ieeexplore.ieee.org/xpl/0000',
+                     'html_url': 'https://ieeexplore.ieee.org/xpls/0000',
+                     'authors': {'authors': [{'full_name': 'N Glynatsi'},
+                     {'full_name': 'V Knight',}]}, 'abstract': "Abstract"}
+
+    api = arcas.Ieee()
+    article = api.to_dataframe(dummy_article)
+
+    assert isinstance(article, pandas.core.frame.DataFrame)
+    assert list(article.columns) == api.keys()
+    assert len(article['url']) == 4
+
+    assert article['url'].unique()[0] == 'https://ieeexplore.ieee.org/xpls/0000'
+    assert article['key'].unique()[0] == 'Glynatsi2010'
+    assert list(article['author'].unique()) == ['N Glynatsi', 'V Knight']
+    assert article['title'].unique()[0] == 'Title'
+    assert article['abstract'].unique()[0] == 'Abstract'
+    assert article['journal'].unique()[0] == 'IEEE/Journal'
+    assert article['date'].unique()[0] == 2010
