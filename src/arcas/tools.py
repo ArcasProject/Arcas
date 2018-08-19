@@ -120,29 +120,6 @@ class Api():
         df = pd.DataFrame(data, columns=self.keys())
         return df
 
-    def validate_post(self, arguments, df):
-        """
-        Checks if the query arguments abstract and title  were satisfied.
-
-        Parameters:
-            - arguments
-            - post
-        Returns:
-           - True of False
-        """
-        arguments = self.lower_case(arguments)
-        word = [arguments['-b'], arguments['-t']]
-
-        fields = ['abstract', 'title']
-        check = [list(df[f].unique()) for f in fields]
-        val = []
-        for i, w in enumerate(word):
-            if w is not None:
-                for j in w.split(' '):
-                    if check[i][0] is not None:
-                        val.append(j in check[i][0].lower())
-        return all(val)
-
     @staticmethod
     def export(df, filename):
         """ Write the results to a json file
@@ -163,16 +140,6 @@ class Api():
             dfs = []
             for raw_article in raw_articles:
                 df = self.to_dataframe(raw_article)
-
-                if validate is True:
-                    try:
-                        self.validate_post(arguments, df)
-                    except:
-                        string = "Validation for article '{}', with " \
-                                 "citation  key:{}.".format(
-                                  df['title'], df['key'])
-                        raise NotImplementedError(string)
-
                 dfs.append(df)
             df = pd.concat(dfs, ignore_index=True)
 
