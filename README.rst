@@ -64,9 +64,3 @@ Examples
 --------
 
 A repository that contains a set of example: https://github.com/ArcasProject/ArcasExamples
-
-
-Contribution
-------------
-
-All contributions are welcome!
