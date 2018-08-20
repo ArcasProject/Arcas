@@ -11,4 +11,4 @@ install:
 
 script:
   - pytest tests
-  - py.test --cov=myproj tests/
+  - py.test --cov=arcas tests/

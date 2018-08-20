@@ -10,9 +10,11 @@ requirements = ["requests>=2.12.1",
                 "requests_mock>=1.2.0",
                 "ratelimit==1.4.1",
                 "docopt",
-                "hypothesis",
                 "pytz",
-                "pandas"]
+                "pandas",
+                "pytest",
+                "pytest-cov"]
+
 
 
 def test_suite():

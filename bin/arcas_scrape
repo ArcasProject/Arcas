@@ -21,7 +21,7 @@ Options:
     -f FILENAME            Name of json file [default: results.json]
 """
 
-from arcas import *
+from arcas import Arxiv, Ieee, Nature, Springer, Plos
 import ast
 from docopt import docopt
 
