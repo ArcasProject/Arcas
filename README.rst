@@ -1,7 +1,17 @@
-[![Build
-Status](https://travis-ci.org/Nikoleta-v3/Arcas.svg?branch=master)](https://travis-ci.org/Nikoleta-v3/Arcas)
+Arcas
+=====
 
-# Arcas
+.. image:: https://api.travis-ci.org/ArcasProject/Arcas.svg?branch=master
+    :target: https://travis-ci.org/ArcasProject/Arcas
+
+.. image:: https://img.shields.io/pypi/v/arcas.svg
+    :target: https://pypi.python.org/pypi/arcas
+
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+    :target: https://gitter.im/ArcasProject/Lobby/?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+.. image:: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+    :target: http://makeapullrequest.com
 
 Arcas is a python tool designed to help with collecting academic articles
 from various APIs.
@@ -23,7 +33,7 @@ The easiest way to install it is:
 $ pip install arcas
 ```
 
-To install from source::
+To install from source:
 
 ```
 $ git clone https://github.com/Nikoleta-v3/Arcas.git

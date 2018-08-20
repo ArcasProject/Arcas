@@ -15,7 +15,8 @@ requirements = ["requests>=2.12.1",
                 "pytest",
                 "pytest-cov"]
 
-
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
 
 def test_suite():
     """Discover all tests in the tests dir"""
