@@ -8,7 +8,8 @@ def test_setup():
 def test_keys():
     api = arcas.Plos()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
-                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score',
+                          'open_access']
 
 def test_parameters_and_url_author():
     api = arcas.Plos()
@@ -74,14 +75,14 @@ def test_create_url_search():
 
 def test_to_dataframe():
     dummy_article = {'response': [],
-                    'id': '10.0000/journal.pone.00000',
-                    'journal': 'PLOS ONE',
-                    'publication_date': '2010-12-12T00:00:00Z',
-                    'article_type': 'Research Article',
-                    'author_display': ['E Glynatsi', 'V Knight'],
-                    'abstract': "Abstract",
-                    'title_display': "Title",
-                    'score': '10'}
+                     'id': '10.0000/journal.pone.00000',
+                     'journal': 'PLOS ONE',
+                     'publication_date': '2010-12-12T00:00:00Z',
+                     'article_type': 'Research Article',
+                     'author_display': ['E Glynatsi', 'V Knight'],
+                     'abstract': "Abstract",
+                     'title_display': "Title",
+                     'score': '10'}
     api = arcas.Plos()
     article = api.to_dataframe(dummy_article)
 
@@ -96,4 +97,5 @@ def test_to_dataframe():
     assert article['journal'].unique()[0] == 'PLOS ONE'
     assert article['date'].unique()[0] == 2010
     assert article['doi'].unique()[0] == dummy_article['id']
-    assert article['score'].unique()[0] == 'Not available'
+    assert article['open_access'].unique()[0] == 'Not available'
+    assert article['score'].unique()[0] == 10

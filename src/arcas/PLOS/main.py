@@ -1,4 +1,5 @@
 from arcas.tools import Api
+import xml.etree.ElementTree as etree
 from xml.etree import ElementTree
 
 
@@ -29,13 +30,15 @@ class Plos(Api):
         raw_article['journal'] = raw_article.get('journal', None)
         raw_article['provenance'] = 'PLOS'
         raw_article['score'] = raw_article.get('score', None)
+        if raw_article['score'] is not None:
+            raw_article['score'] = int(raw_article['score'])
         raw_article['doi'] = raw_article.get('id', None)
         raw_article['url'] = 'https://doi.org/' + raw_article['id']
         raw_article['title'] = raw_article.get('title_display', None)
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
         raw_article['category'] = 'Not available'
-        raw_article['score'] = 'Not available'
+        raw_article['open_access'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     @staticmethod
@@ -56,25 +59,9 @@ class Plos(Api):
 
     def parse(self, root):
         """Parsing the xml file"""
-        branches = root.getchildren()
-        if len(branches[0]) == 0:
+        if root['response']['numFound'] == 0:
             return False
-        else:
-            raw_articles = [[]]
-            for at in branches[0].iter():
-                try:
-                    key = list(at.attrib.values())[0]
-                except IndexError:
-                    key = None
-                if key == 'score':
-                    raw_articles[-1].append((key, at.text))
-                    raw_articles.append([])
-                else:
-                    raw_articles[-1].append((key, at.text))
-            while [] in raw_articles:
-                raw_articles.remove([])
-
-        return [self.xml_to_dict(raw_article) for raw_article in raw_articles]
+        return root['response']['docs']
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
@@ -102,6 +89,6 @@ class Plos(Api):
 
     @staticmethod
     def get_root(response):
-        root = ElementTree.fromstring(response.text)
+        root = response.json()
         return root
 

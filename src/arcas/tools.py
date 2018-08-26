@@ -39,7 +39,7 @@ class Api():
         Fields we are keeping from arXiv results.
         """
         keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
-                'date', 'journal', 'provenance', 'category', 'score']
+                'date', 'journal', 'provenance', 'category', 'score', 'open_access']
         return keys
 
     @staticmethod

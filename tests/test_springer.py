@@ -8,7 +8,8 @@ def test_setup():
 def test_keys():
     api = arcas.Springer()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
-                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score',
+                          'open_access']
 
 def test_parameters_and_url_author():
     api = arcas.Springer()
@@ -70,7 +71,8 @@ def test_to_dataframe():
                      'Awesome Journal', 'genre': 'ReviewPaper', 'openAccess': 'false',
                      'h1': 'Abstract', 'p': 'Abstract',
                      'doi': '10.1000/', 'publisher': 'Springer',
-                     'publicationDate': '2021-01-01', 'url': 'http://dx.doi.org/10.1000/'}
+                     'publicationDate': '2021-01-01', 'url': 'http://dx.doi.org/10.1000/',
+                     'openAccess': 'false',}
 
     api = arcas.Springer()
     article = api.to_dataframe(dummy_article)
@@ -85,4 +87,5 @@ def test_to_dataframe():
     assert article['abstract'].unique()[0] == 'Abstract'
     assert article['journal'].unique()[0] == 'Awesome Journal'
     assert article['date'].unique()[0] == 2021
+    assert article['open_access'].unique()[0] == False
     assert article['score'].unique()[0] == 'Not available'

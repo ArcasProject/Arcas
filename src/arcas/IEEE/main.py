@@ -60,6 +60,7 @@ class Ieee(Api):
         raw_article['provenance'] = 'IEEE'
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['open_access'] = raw_article['access_type'] == 'OPEN_ACCESS'
         raw_article['score'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 

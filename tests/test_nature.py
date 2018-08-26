@@ -8,7 +8,8 @@ def test_setup():
 def test_keys():
     api = arcas.Nature()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
-                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score',
+                          'open_access']
 
 def test_parameters_and_url_author():
     api = arcas.Nature()
@@ -105,3 +106,4 @@ def test_to_dataframe():
     assert article['doi'].unique()[0] == '10.1000'
     assert article['category'].unique()[0] == None
     assert article['score'].unique()[0] == 'Not available'
+    assert article['open_access'].unique()[0] == 'Not available'

@@ -13,7 +13,7 @@ class Arxiv(Api):
         """
         keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
                 'date', 'journal', 'provenance', 'primary_category', 'category',
-                'score']
+                'score', 'open_access']
         return keys
 
     def to_dataframe(self, raw_article):
@@ -38,6 +38,7 @@ class Arxiv(Api):
         raw_article['doi'] = raw_article.get('doi', None)
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['open_access'] = True
         raw_article['score'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 

@@ -38,6 +38,7 @@ class Springer(Api):
         raw_article['doi'] = raw_article.get('doi', None)        
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['open_access'] = raw_article['openAccess'] == 'true'
         raw_article['score'] = 'Not available'
         raw_article['category'] = 'Not available'
         return self.dict_to_dataframe(raw_article)

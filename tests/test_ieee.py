@@ -8,7 +8,8 @@ def test_setup():
 def test_keys():
     api = arcas.Ieee()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
-                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score',
+                          'open_access']
 
 def test_parameters_and_url_author():
     api = arcas.Ieee()
@@ -92,7 +93,8 @@ def test_to_dataframe():
                      'abstract_url': 'https://ieeexplore.ieee.org/xpl/0000',
                      'html_url': 'https://ieeexplore.ieee.org/xpls/0000',
                      'authors': {'authors': [{'full_name': 'N Glynatsi'},
-                     {'full_name': 'V Knight',}]}, 'abstract': "Abstract"}
+                     {'full_name': 'V Knight',}]}, 'abstract': "Abstract",
+                     'access_type': 'LOCKED'}
 
     api = arcas.Ieee()
     article = api.to_dataframe(dummy_article)
@@ -108,4 +110,5 @@ def test_to_dataframe():
     assert article['abstract'].unique()[0] == 'Abstract'
     assert article['journal'].unique()[0] == 'IEEE/Journal'
     assert article['date'].unique()[0] == 2010
+    assert article['open_access'].unique()[0] == False
     assert article['score'].unique()[0] == 'Not available'
