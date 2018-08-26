@@ -8,7 +8,7 @@ def test_setup():
 def test_keys():
     api = arcas.Plos()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
-                          'doi', 'date', 'journal', 'provenance', 'score']
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
 
 def test_parameters_and_url_author():
     api = arcas.Plos()
@@ -96,3 +96,4 @@ def test_to_dataframe():
     assert article['journal'].unique()[0] == 'PLOS ONE'
     assert article['date'].unique()[0] == 2010
     assert article['doi'].unique()[0] == dummy_article['id']
+    assert article['score'].unique()[0] == 'Not available'

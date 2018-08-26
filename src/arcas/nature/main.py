@@ -6,15 +6,6 @@ class Nature(Api):
     def __init__(self):
         self.standard = 'http://www.nature.com/opensearch/request?&query='
 
-    @staticmethod
-    def keys():
-        """
-        Fields we are keeping from Springer results.
-        """
-        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
-                'date', 'journal', 'provenance', 'category']
-        return keys
-
     def create_url_search(self, parameters):
         """Creates the search url, combining the standard url and various
         search parameters."""
@@ -84,6 +75,7 @@ class Nature(Api):
         raw_article['doi'] = raw_article.get('doi', None)
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['score'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     @staticmethod

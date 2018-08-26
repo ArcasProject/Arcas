@@ -8,7 +8,7 @@ def test_setup():
 def test_keys():
     api = arcas.Ieee()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
-                          'doi', 'date', 'journal', 'provenance', 'category']
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
 
 def test_parameters_and_url_author():
     api = arcas.Ieee()
@@ -108,3 +108,4 @@ def test_to_dataframe():
     assert article['abstract'].unique()[0] == 'Abstract'
     assert article['journal'].unique()[0] == 'IEEE/Journal'
     assert article['date'].unique()[0] == 2010
+    assert article['score'].unique()[0] == 'Not available'

@@ -34,6 +34,15 @@ class Api():
         return url
 
     @staticmethod
+    def keys():
+        """
+        Fields we are keeping from arXiv results.
+        """
+        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
+                'date', 'journal', 'provenance', 'category', 'score']
+        return keys
+
+    @staticmethod
     @ratelimit.rate_limited(3)
     def make_request(url):
         """Request from an API and returns response."""
@@ -53,10 +62,6 @@ class Api():
             else:
                 d.update({key: at.text})
         return d
-
-    @staticmethod
-    def keys():
-        pass
 
     @staticmethod
     def to_dataframe(raw_article):

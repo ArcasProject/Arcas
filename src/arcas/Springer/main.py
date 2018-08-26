@@ -8,15 +8,6 @@ class Springer(Api):
         self.standard = 'http://api.springer.com/metadata/pam?q='
         self.key_api = api_key
 
-    @staticmethod
-    def keys():
-        """
-        Fields we are keeping from Springer results.
-        """
-        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
-                'date', 'journal', 'provenance']
-        return keys
-
     def create_url_search(self, parameters):
         """Creates the search url, combining the standard url and various
         search parameters."""
@@ -40,15 +31,15 @@ class Springer(Api):
             raw_article['author'] = raw_article['author'].split(',')
 
         raw_article['abstract'] = raw_article.get('p', None)
-        raw_article['date'] = int(raw_article.get('publicationDate', '0').split('-')[
-                                  0])
+        raw_article['date'] = int(raw_article.get('publicationDate', '0').split('-')[0])
         raw_article['journal'] = raw_article.get('publicationName', None)
         raw_article['provenance'] = 'Springer'
         raw_article['title'] = raw_article.get('title', None)
         raw_article['doi'] = raw_article.get('doi', None)        
-        raw_article['key'], raw_article['unique_key'] = self.create_keys(
-            raw_article)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['score'] = 'Not available'
+        raw_article['category'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     @staticmethod

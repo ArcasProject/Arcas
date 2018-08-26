@@ -12,7 +12,8 @@ class Arxiv(Api):
         Fields we are keeping from arXiv results.
         """
         keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
-                'date', 'journal', 'provenance', 'primary_category', 'category']
+                'date', 'journal', 'provenance', 'primary_category', 'category',
+                'score']
         return keys
 
     def to_dataframe(self, raw_article):
@@ -37,6 +38,7 @@ class Arxiv(Api):
         raw_article['doi'] = raw_article.get('doi', None)
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['score'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     def parse(self, root):

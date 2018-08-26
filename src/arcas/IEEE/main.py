@@ -33,15 +33,6 @@ class Ieee(Api):
             raise APIError(response.status_code)
         return response
 
-    @staticmethod
-    def keys():
-        """
-        Fields we are keeping from IEEE results.
-        """
-        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
-                'date', 'journal', 'provenance', 'category']
-        return keys
-
     def to_dataframe(self, raw_article):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
@@ -69,6 +60,7 @@ class Ieee(Api):
         raw_article['provenance'] = 'IEEE'
         raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['score'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     def parse(self, root):

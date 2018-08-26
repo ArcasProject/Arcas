@@ -7,8 +7,8 @@ def test_setup():
 
 def test_keys():
     api = arcas.Springer()
-    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author',
-                          'abstract', 'doi', 'date', 'journal', 'provenance']
+    assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author', 'abstract',
+                          'doi', 'date', 'journal', 'provenance', 'category', 'score']
 
 def test_parameters_and_url_author():
     api = arcas.Springer()
@@ -85,3 +85,4 @@ def test_to_dataframe():
     assert article['abstract'].unique()[0] == 'Abstract'
     assert article['journal'].unique()[0] == 'Awesome Journal'
     assert article['date'].unique()[0] == 2021
+    assert article['score'].unique()[0] == 'Not available'

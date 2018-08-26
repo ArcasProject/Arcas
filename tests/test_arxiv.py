@@ -9,7 +9,7 @@ def test_keys():
     api = arcas.Arxiv()
     assert api.keys() == ['url', 'key', 'unique_key', 'title', 'author',
                           'abstract', 'doi', 'date', 'journal', 'provenance',
-                          'primary_category', 'category']
+                          'primary_category', 'category', 'score']
 
 def test_parameters_and_url_author():
     api = arcas.Arxiv()
@@ -94,3 +94,4 @@ def test_to_dataframe():
     assert article['journal'].unique()[0] == 'Awesome Journal'
     assert article['primary_category'].unique()[0] == 'Dummy'
     assert article['category'].unique()[0] == None
+    assert article['score'].unique()[0] == 'Not available'
