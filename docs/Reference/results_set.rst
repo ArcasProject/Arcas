@@ -30,5 +30,9 @@ list of metadata:
     -  A single entity of a keyword assigned to the article by the given journal
 - :code:`provenance`
     - Scholarly database for where the article was collected
+- :code:`category`
+    - A list of subjects given to the article by the authors
 - :code:`score`
     - Score given to article by the given journal
+- :code:`open_access`
+    - A boolean describing whether the article is open access or not
