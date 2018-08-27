@@ -2,11 +2,12 @@ Welcome to Arcas' documentation!
 =================================
 Arcas is Python library which allow users to collect academic articles' metadata.
 
-Nowdays a large number of scholarly databases and collections offer some form of
+Nowadays a large number of scholarly databases and collections offer some form of
 API access. An API is an online tool to access data straight from the databases.
 Arcas is a tool designed to help communicate/ping various of these APIs.
 
-Today, Arcas offers access to metadata of articles from the following publishers:
+Today, Arcas offers access to metadata of articles from the following journals
+and pre-prints:
 
 - IEEE
 - PLOS
@@ -17,7 +18,7 @@ Today, Arcas offers access to metadata of articles from the following publishers
 In this documentation you will find a list tutorials that cover the basic usage
 of the library.
 
-Note some publishers might require you to register and generate an application
+Note some journals might require you to register and generate an application
 `key`. Today the following publishers require you to register your application:
 
 - IEEE

@@ -22,6 +22,10 @@ list of metadata:
     - The abstract of the article
 - :code:`date`
     - Date of publication
+- :code:`doi`
+    - Article's doi
+- :code:`url`
+    - Article's url
 - :code:`journal`
     - Journal of publication
 - :code:`pages`
@@ -36,3 +40,7 @@ list of metadata:
     - Score given to article by the given journal
 - :code:`open_access`
     - A boolean describing whether the article is open access or not
+
+Note that if a specific result is not available by an API, not because is missing
+but because is not implemented, Arcas returns :code:`'Not available'` for the
+value of that column.
