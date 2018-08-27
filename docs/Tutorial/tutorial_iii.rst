@@ -33,3 +33,6 @@ In our example this might not seem as an important difference. But assume you
 were asking for a hundred of articles. Some APIs have a limited number of
 articles that be can returned, thus using this practice we avoid overloading
 the API.
+
+Note that you need to require a :code:`key`  before being able to use :code:`arcas.Ieee`
+and :code:`arcas.Springer`.
