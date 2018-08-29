@@ -3,11 +3,10 @@
 How to use Arcas from the command line
 ======================================
 
-Arcas is a tool which can be used by the command line as well. Arcas uses a package
-called :code:docopt for passing arguments via the command line.
+Arcas is a tool which can be used by the command line as well. 
 
 To get information on the arguments we can pass we type the following command
-in a command prompt window::
+in a command prompt::
 
     $ arcas_scrape --h 
     Arcas. A library to facilitate scraping of APIs for scholarly resources.
