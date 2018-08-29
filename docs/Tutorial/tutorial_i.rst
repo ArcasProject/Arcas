@@ -36,13 +36,18 @@ are recorded in the journal arXiv. Here we can type the following to see the
 columns of the data frame::
 
     >>> article.columns
-    Index(['key', 'unique_key', 'title', 'author', 'abstract', 'date', 'journal',
-           'pages', 'key_word', 'provenance'],dtype='object')
+    Index(['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
+       'date', 'journal', 'provenance', 'primary_category', 'category',
+       'score', 'open_access'],
+      dtype='object')
 
 and we can ask for the title::
 
     >>> article.title.unique()
         array([ 'A New Approach to Solve a Class of Continuous-Time Nonlinear
         Quadratic Zero-Sum Game Using ADP'], dtype=object)
+
+Note that you might be getting a different title that me. That is fine it's just
+that new articles have been added to the API's database.
 
 The structure of the results is discussed in depth in :ref:`result set<results-set>`.

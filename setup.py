@@ -10,10 +10,13 @@ requirements = ["requests>=2.12.1",
                 "requests_mock>=1.2.0",
                 "ratelimit==1.4.1",
                 "docopt",
-                "hypothesis",
                 "pytz",
-                "pandas"]
+                "pandas",
+                "pytest",
+                "pytest-cov"]
 
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
 
 def test_suite():
     """Discover all tests in the tests dir"""

@@ -1,22 +1,11 @@
 from arcas.tools import Api
+import xml.etree.ElementTree as etree
 from xml.etree import ElementTree
 
 
 class Plos(Api):
-    """
-     API argument is 'plot'.
-    """
     def __init__(self):
         self.standard = 'http://api.plos.org/search?q='
-
-    @staticmethod
-    def keys():
-        """
-        Fields we are keeping from Springer results.
-        """
-        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-                'date', 'journal', 'provenance', 'score']
-        return keys
 
     def create_url_search(self, parameters):
         """Creates the search url, combining the standard url and various
@@ -35,19 +24,21 @@ class Plos(Api):
         results and transform it to a standardized format.
         """
         raw_article['author'] = raw_article.get('author_display', None)
-        try:
-            raw_article['abstract'] = raw_article.get('abstract', [None])[0]
-        except IndexError:
-            raw_article['abstract'] = None
+        raw_article['abstract'] = raw_article.get('abstract', [None])
 
         raw_article['date'] = int(raw_article.get('publication_date', '0').split('-')[0])
         raw_article['journal'] = raw_article.get('journal', None)
         raw_article['provenance'] = 'PLOS'
         raw_article['score'] = raw_article.get('score', None)
+        if raw_article['score'] is not None:
+            raw_article['score'] = int(raw_article['score'])
+        raw_article['doi'] = raw_article.get('id', None)
+        raw_article['url'] = 'https://doi.org/' + raw_article['id']
         raw_article['title'] = raw_article.get('title_display', None)
-        raw_article['key'], raw_article['unique_key'] = self.create_keys(
-            raw_article)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['category'] = 'Not available'
+        raw_article['open_access'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     @staticmethod
@@ -68,40 +59,27 @@ class Plos(Api):
 
     def parse(self, root):
         """Parsing the xml file"""
-        parents = root.getchildren()
-        if len(parents[0]) == 0:
+        if root['response']['numFound'] == 0:
             return False
-        else:
-            raw_articles = [[]]
-            for at in parents[0].iter():
-                try:
-                    key = list(at.attrib.values())[0]
-                except IndexError:
-                    key = None
-                if key == 'score':
-                    raw_articles[-1].append((key, at.text))
-                    raw_articles.append([])
-                else:
-                    raw_articles[-1].append((key, at.text))
-            while [] in raw_articles:
-                raw_articles.remove([])
-
-        return [self.xml_to_dict(raw_article) for raw_article in raw_articles]
+        return root['response']['docs']
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None):
+                       records=None, start=None, category=None, journal=None):
         parameters = []
         if author is not None:
-            parameters.append('author:{}'.format(author))
+            parameters.append('author:"{}"'.format(author))
         if title is not None:
-            parameters.append('title:{}'.format(title))
+            parameters.append('title:"{}"'.format(title))
         if abstract is not None:
-            parameters.append('abstract:{}'.format(abstract))
+            parameters.append('abstract:"{}"'.format(abstract))
         if year is not None:
             parameters.append('publication_date:[{0}-01-01T00:00:00Z TO '
-                              '{0}-12-30T23:59:59Z]'
-                              .format(year))
+                              '{0}-12-30T23:59:59Z]'.format(year))
+        if journal is not None:
+            parameters.append('journal:"{}"'.format(journal))
+        if category is not None:
+            parameters.append('subject:"{}"'.format(category))
         if records is not None:
             parameters.append('rows={}'.format(records))
         if start is not None:
@@ -111,6 +89,6 @@ class Plos(Api):
 
     @staticmethod
     def get_root(response):
-        root = ElementTree.fromstring(response.text)
+        root = response.json()
         return root
 

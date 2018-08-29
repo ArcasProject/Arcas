@@ -3,9 +3,6 @@ from xml.etree import ElementTree
 
 
 class Arxiv(Api):
-    """
-     API argument is 'ieee'.
-    """
     def __init__(self):
         self.standard = 'http://export.arxiv.org/api/query?search_query='
 
@@ -14,19 +11,21 @@ class Arxiv(Api):
         """
         Fields we are keeping from arXiv results.
         """
-        keys = ['key', 'unique_key', 'title', 'author', 'abstract',
-                'date', 'journal', 'provenance']
+        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
+                'date', 'journal', 'provenance', 'primary_category', 'category',
+                'score', 'open_access']
         return keys
 
     def to_dataframe(self, raw_article):
         """A function which takes a dictionary with structure of the arXiv
-        results and transform it to a standardized format.
+        results, transforms it to a standardized format and returns a dataframe.
         """
-        raw_article = {k.split('}')[-1]: v for k, v in raw_article.items()}
+        raw_article['url'] = raw_article.get('id', None)
 
-        raw_article['author'] = raw_article.get('name', None)
-        if raw_article['author'] is not None:
-            raw_article['author'] = raw_article['author'].split(',')
+        for key_one, key_two in [['author', 'name'], ['category', 'category']]:
+            raw_article[key_one] = raw_article.get(key_two, None)
+            if raw_article[key_one] is not None:
+                raw_article[key_one] = raw_article[key_one].split(',')
 
         raw_article['abstract'] = raw_article.get('summary', None)
         raw_article['date'] = int(raw_article.get('published', '0').split('-')[0])
@@ -36,27 +35,27 @@ class Arxiv(Api):
 
         raw_article['provenance'] = 'arXiv'
         raw_article['title'] = raw_article.get('title', None)
-        raw_article['key'], raw_article['unique_key'] = self.create_keys(
-            raw_article)
+        raw_article['doi'] = raw_article.get('doi', None)
+        raw_article['key'], raw_article['unique_key'] = self.create_keys(raw_article)
 
+        raw_article['open_access'] = True
+        raw_article['score'] = 'Not available'
         return self.dict_to_dataframe(raw_article)
 
     def parse(self, root):
         """Removing unwanted branches."""
-        parents = root.getchildren()
+        branches = root.getchildren()
         raw_articles = []
-        for _ in range(7):
-            parents.remove(parents[0])
-        if not parents:
-            raw_articles = False
-        else:
-            for record in parents:
+        for record in branches:
+            if 'entry' in record.tag:
                 raw_articles.append(self.xml_to_dict(record))
+        if not raw_articles:
+            raw_articles = False
         return raw_articles
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None):
+                       records=None, start=None, category=None, journal=None):
         parameters = []
         if author is not None:
             parameters.append('au:{}'.format(author))
@@ -64,10 +63,16 @@ class Arxiv(Api):
             parameters.append('ti:{}'.format(title))
         if abstract is not None:
             parameters.append('abs:{}'.format(abstract))
+        if category is not None:
+            parameters.append('cat:{}'.format(category))
+        if journal is not None:
+            parameters.append('jr:{}'.format(journal))
         if records is not None:
             parameters.append('max_results={}'.format(records))
         if start is not None:
             parameters.append('start={}'.format(start))
+        if year is not None:
+            print('ArXiv does not support argument year.') # TODO: Add url to documentation
 
         return parameters
 

@@ -1,10 +1,11 @@
-from xml.etree import ElementTree
-
-import requests
 import hashlib
 import itertools
+from xml.etree import ElementTree
+
 import pandas as pd
-from ratelimit import *
+import requests
+
+import ratelimit
 
 
 class APIError(Exception):
@@ -33,7 +34,16 @@ class Api():
         return url
 
     @staticmethod
-    @rate_limited(3)
+    def keys():
+        """
+        Fields we are keeping from arXiv results.
+        """
+        keys = ['url', 'key', 'unique_key', 'title', 'author', 'abstract', 'doi',
+                'date', 'journal', 'provenance', 'category', 'score', 'open_access']
+        return keys
+
+    @staticmethod
+    @ratelimit.rate_limited(3)
     def make_request(url):
         """Request from an API and returns response."""
         response = requests.get(url, stream=True)
@@ -46,15 +56,12 @@ class Api():
         """Xml response with information on article to dictionary"""
         d = {}
         for at in record.iter():
-            if at.tag in d and at.text is not None:
-                d[at.tag] += ',{}'.format(at.text)
+            key = at.tag.split('}')[-1]
+            if key in d and at.text is not None:
+                d[key] += ', {}'.format(at.text)
             else:
-                d.update({at.tag: at.text})
+                d.update({key: at.text})
         return d
-
-    @staticmethod
-    def keys():
-        pass
 
     @staticmethod
     def to_dataframe(raw_article):
@@ -66,7 +73,7 @@ class Api():
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None):
+                       records=None, start=None, category=None, journal=None):
         pass
 
     @staticmethod
@@ -118,29 +125,6 @@ class Api():
         df = pd.DataFrame(data, columns=self.keys())
         return df
 
-    def validate_post(self, arguments, df):
-        """
-        Checks if the query arguments abstract and title  were satisfied.
-
-        Parameters:
-            - arguments
-            - post
-        Returns:
-           - True of False
-        """
-        arguments = self.lower_case(arguments)
-        word = [arguments['-b'], arguments['-t']]
-
-        fields = ['abstract', 'title']
-        check = [list(df[f].unique()) for f in fields]
-        val = []
-        for i, w in enumerate(word):
-            if w is not None:
-                for j in w.split(' '):
-                    if check[i][0] is not None:
-                        val.append(j in check[i][0].lower())
-        return all(val)
-
     @staticmethod
     def export(df, filename):
         """ Write the results to a json file
@@ -161,21 +145,7 @@ class Api():
             dfs = []
             for raw_article in raw_articles:
                 df = self.to_dataframe(raw_article)
-
-                if validate is True:
-                    try:
-                        self.validate_post(arguments, df)
-                    except:
-                        string = "Validation for article '{}', with " \
-                                 "citation  key:{}.".format(
-                                  df['title'], df['key'])
-                        raise NotImplementedError(string)
-
                 dfs.append(df)
             df = pd.concat(dfs, ignore_index=True)
 
             self.export(df, filename=arguments['-f'])
-
-
-
-

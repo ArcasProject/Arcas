@@ -1,12 +1,11 @@
 Tutorials
 =========
 
-Arcas' tutorial wil cover the basic usage of the library. It covers a
-tutorial on
-retrieving a single article from a single API, retrieving the same article from
-various APIs and finally retrieving a large number of articles from different
-APIs.
+Arcas' tutorials cover the basic usage of the library.
 
+These include retrieving medata of a single article from a single API, retrieving
+the same article from various APIs and finally retrieving a large number of medata
+from different APIs.
 
 Contents:
 

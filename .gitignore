@@ -31,3 +31,6 @@ Structures.ipynb
 *.snm
 *.toc
 beamercolorthemesolarized.sty
+
+# tests
+.pytest_cache/

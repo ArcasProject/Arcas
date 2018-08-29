@@ -27,3 +27,6 @@ APIs classes. For each instance then repeat the following procedure::
 The :code:`export` function, is a function that writes the results to a `json
 <http://www.json.org/>`_ file. Here the results of each API are stored to
 a different file named after which API they come from.
+
+Note that you need to require a :code:`key`  before being able to use :code:`arcas.Ieee`
+and :code:`arcas.Springer`.

@@ -6,5 +6,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   Apis/index.rst
+   search_fields.rst
    results_set.rst
+   Apis/index.rst
