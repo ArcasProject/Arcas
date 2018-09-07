@@ -37,9 +37,9 @@ class Ieee(Api):
         """A function which takes a dictionary with structure of the IEEE
         results and transform it to a standardized format.
         """
-        raw_article['url'] = raw_article['html_url']
+        raw_article['url'] = raw_article.get('html_url', None)
         raw_article['author'] = [author['full_name'] for author in raw_article['authors']['authors']]
-
+        raw_article['abstract'] = raw_article.get('abstract', None)
         if raw_article['content_type'] == 'Conferences':
             date = raw_article.get('conference_dates', None)
         else:
@@ -53,7 +53,11 @@ class Ieee(Api):
             try:
                 category = category['author_terms']['terms']
             except KeyError:
-                category = category['ieee_terms']['terms']
+                try:
+                    category = category['ieee_terms']['terms']
+                except KeyError:
+                    category = None
+        raw_article['doi'] = raw_article.get('doi', None)
         raw_article['category'] = category
 
         raw_article['journal'] = raw_article.get('publication_title', None)
