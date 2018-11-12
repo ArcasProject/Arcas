@@ -29,6 +29,8 @@ class Springer(Api):
         raw_article['author'] = raw_article.get('creator', None)
         if raw_article['author'] is not None:
             raw_article['author'] = raw_article['author'].split(',')
+        else:
+            raw_article['author'] = ['No authors found for this document.']
 
         raw_article['abstract'] = raw_article.get('p', None)
         raw_article['date'] = int(raw_article.get('publicationDate', '0').split('-')[0])
@@ -78,7 +80,8 @@ class Springer(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None, category=None, journal=None):
+                       records=None, start=None, category=None, journal=None,
+                       keyword=None):
         parameters = []
         if author is not None:
             parameters.append('name:{}'.format(author))
@@ -90,6 +93,8 @@ class Springer(Api):
             parameters.append('subject:{}'.format(category))
         if journal is not None:
             parameters.append('pub:{}'.format(journal))
+        if keyword is not None:
+            parameters.append('keyword:{}'.format(keyword))
         if records is not None:
             parameters.append('p={}'.format(records))
         if start is not None:

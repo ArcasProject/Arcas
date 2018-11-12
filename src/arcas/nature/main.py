@@ -61,6 +61,8 @@ class Nature(Api):
             raw_article[key_one] = raw_article.get(key_two, None)
             if raw_article[key_one] is not None:
                 raw_article[key_one] = raw_article[key_one].split(',')
+        if raw_article['author'] is None:
+            raw_article['author'] = ['No authors found for this document.']
 
         raw_article['abstract'] = raw_article.get('description', None)
         raw_article['date'] = int(raw_article.get('publicationDate', '0').split('-')[0])
@@ -81,7 +83,8 @@ class Nature(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None, category=None, journal=None):
+                       records=None, start=None, category=None, journal=None,
+                       keyword=None):
         parameters = []
         if author is not None:
             parameters.append('dc.creator={}'.format(author))
@@ -95,6 +98,8 @@ class Nature(Api):
             parameters.append('prism.publicationName={}'.format(journal))
         if category is not None:
             parameters.append('dc.subject adj {}'.format(category))
+        if keyword is not None:
+            parameters.append('cql.keywords={}'.format(keyword))
         if records is not None:
             parameters.append('maximumRecords={}'.format(records))
         if start is not None:

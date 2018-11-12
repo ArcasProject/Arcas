@@ -38,7 +38,10 @@ class Ieee(Api):
         results and transform it to a standardized format.
         """
         raw_article['url'] = raw_article.get('html_url', None)
-        raw_article['author'] = [author['full_name'] for author in raw_article['authors']['authors']]
+        try:
+            raw_article['author'] = [author['full_name'] for author in raw_article['authors']['authors']]
+        except KeyError:
+            raw_article['author'] = ['No authors found for this document.']
         raw_article['abstract'] = raw_article.get('abstract', None)
         if raw_article['content_type'] == 'Conferences':
             date = raw_article.get('conference_dates', None)
@@ -76,7 +79,8 @@ class Ieee(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None, category=None, journal=None):
+                       records=None, start=None, category=None, journal=None,
+                       keyword=None):
         parameters = []
         if author is not None:
             parameters.append('author={}'.format(author))
@@ -90,6 +94,8 @@ class Ieee(Api):
             parameters.append('index_terms={}'.format(category))
         if journal is not None:
             parameters.append('publication_title={}'.format(journal))
+        if keyword is not None:
+            parameters.append('querytext={}'.format(keyword))
         if records is not None:
             parameters.append('max_records={}'.format(records))
         if start is not None:

@@ -65,7 +65,8 @@ class Plos(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None, category=None, journal=None):
+                       records=None, start=None, category=None, journal=None,
+                       keyword=None):
         parameters = []
         if author is not None:
             parameters.append('author:"{}"'.format(author))
@@ -80,6 +81,8 @@ class Plos(Api):
             parameters.append('journal:"{}"'.format(journal))
         if category is not None:
             parameters.append('subject:"{}"'.format(category))
+        if keyword is not None:
+            parameters.append('everything:"{}"'.format(keyword))
         if records is not None:
             parameters.append('rows={}'.format(records))
         if start is not None:

@@ -55,7 +55,8 @@ class Arxiv(Api):
 
     @staticmethod
     def parameters_fix(author=None, title=None, abstract=None, year=None,
-                       records=None, start=None, category=None, journal=None):
+                       records=None, start=None, category=None, journal=None,
+                       keyword=None):
         parameters = []
         if author is not None:
             parameters.append('au:{}'.format(author))
@@ -67,6 +68,8 @@ class Arxiv(Api):
             parameters.append('cat:{}'.format(category))
         if journal is not None:
             parameters.append('jr:{}'.format(journal))
+        if keyword is not None:
+            parameters.append('all:{}'.format(keyword))
         if records is not None:
             parameters.append('max_results={}'.format(records))
         if start is not None:
