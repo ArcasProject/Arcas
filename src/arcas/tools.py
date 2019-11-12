@@ -96,7 +96,7 @@ class Api():
         """
         try:
             full_name = raw_article['author'][0].split(' ')
-        except TypeError:
+        except (TypeError, IndexError) as e:
             full_name = [None]
         year = raw_article['date']
         string = '{}{}{}{}'.format(full_name[-1], raw_article['title'], year,
